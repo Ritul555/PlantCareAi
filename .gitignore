@@ -1,0 +1,104 @@
+# ===========================
+# Python
+# ===========================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+venv/
+env/
+.venv/
+*.whl
+
+# ===========================
+# Environment & Secrets
+# ===========================
+.env
+.env.local
+.env.production
+*.pem
+*.key
+
+# ===========================
+# IDE
+# ===========================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ===========================
+# Flutter / Dart
+# ===========================
+mobile/.dart_tool/
+mobile/.packages
+mobile/build/
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
+mobile/pubspec.lock
+*.iml
+
+# ===========================
+# AI / ML Models
+# ===========================
+models/*.pth
+models/*.pt
+models/*.h5
+models/*.onnx
+models/*.tflite
+!models/README.md
+
+# ===========================
+# Dataset (large files)
+# ===========================
+dataset/**/*.jpg
+dataset/**/*.jpeg
+dataset/**/*.png
+dataset/**/*.bmp
+!dataset/README.md
+
+# ===========================
+# Docker
+# ===========================
+docker-compose.override.yml
+
+# ===========================
+# Uploads & Media
+# ===========================
+uploads/
+media/
+static/uploads/
+
+# ===========================
+# Database
+# ===========================
+*.db
+*.sqlite3
+
+# ===========================
+# Logs
+# ===========================
+*.log
+logs/
+
+# ===========================
+# Testing
+# ===========================
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+
+# ===========================
+# IoT
+# ===========================
+iot/esp32/.pio/
+iot/esp32/.vscode/
