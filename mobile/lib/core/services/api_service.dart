@@ -20,7 +20,10 @@ class ApiService {
   // -------------------------------------------------------
 
   /// Backend base URL. Change this if running backend on a different host/port.
-  static const String _baseUrl = 'http://localhost:8000';
+  static const String _baseUrl = String.fromEnvironment(
+    'API_URL', 
+    defaultValue: 'http://localhost:8000',
+  );
   static const String _tokenKey = 'plantcare_jwt_token';
 
   // -------------------------------------------------------
