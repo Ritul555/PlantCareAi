@@ -72,6 +72,8 @@ def analyze_plant_image(
     """
     Analyze a plant image using Google Gemini Vision API.
 
+    Uses the new `google-genai` SDK (supports AQ. API keys from AI Studio).
+
     Args:
         image_bytes: Raw image bytes
         content_type: MIME type of the image
@@ -80,7 +82,8 @@ def analyze_plant_image(
         dict with structured plant health analysis
     """
     try:
-        import google.generativeai as genai
+        from google import genai
+        from google.genai import types
         from app.config import settings
 
         # Check API key
@@ -88,21 +91,23 @@ def analyze_plant_image(
             logger.warning("Gemini API key not configured — returning mock analysis")
             return _mock_analysis()
 
-        # Configure Gemini
-        genai.configure(api_key=settings.GEMINI_API_KEY)
-        model = genai.GenerativeModel(settings.GEMINI_MODEL)
+        # Configure new genai client
+        client = genai.Client(api_key=settings.GEMINI_API_KEY)
 
-        # Prepare image for Gemini (inline_data format)
-        image_part = {
-            "inline_data": {
-                "mime_type": content_type,
-                "data": base64.b64encode(image_bytes).decode("utf-8"),
-            }
-        }
+        # Build image part using inline data
+        image_part = types.Part.from_bytes(
+            data=image_bytes,
+            mime_type=content_type,
+        )
 
         # Call Gemini Vision
-        logger.info(f"Sending image to Gemini ({settings.GEMINI_MODEL})...")
-        response = model.generate_content([PLANT_ANALYSIS_PROMPT, image_part])
+        model = settings.GEMINI_MODEL
+        logger.info(f"Sending image to Gemini ({model})...")
+
+        response = client.models.generate_content(
+            model=model,
+            contents=[PLANT_ANALYSIS_PROMPT, image_part],
+        )
 
         # Parse JSON response
         raw_text = response.text.strip()
@@ -122,7 +127,7 @@ def analyze_plant_image(
         return _mock_analysis(error="AI returned unexpected format")
 
     except ImportError:
-        logger.error("google-generativeai not installed. Run: pip install google-generativeai")
+        logger.error("google-genai not installed. Run: pip install google-genai")
         return _mock_analysis(error="Gemini SDK not installed")
 
     except Exception as e:
