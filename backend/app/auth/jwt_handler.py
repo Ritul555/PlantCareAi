@@ -126,3 +126,27 @@ def get_current_user(
         )
 
     return user
+
+
+oauth2_scheme_optional = OAuth2PasswordBearer(tokenUrl="/auth/login", auto_error=False)
+
+
+def get_optional_current_user(
+    token: Optional[str] = Depends(oauth2_scheme_optional),
+    db: Session = Depends(get_db)
+) -> Optional[User]:
+    """
+    FastAPI dependency: Get the current user if token provided, otherwise return None.
+    Does not throw 401 error if no Authorization header is present.
+    """
+    if not token:
+        return None
+    try:
+        payload = verify_token(token)
+        user_id = payload.get("sub")
+        if user_id is None:
+            return None
+        return db.query(User).filter(User.id == int(user_id)).first()
+    except Exception:
+        return None
+

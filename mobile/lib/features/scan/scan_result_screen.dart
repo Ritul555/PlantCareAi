@@ -1,4 +1,4 @@
-/// PlantCare AI — Scan Result Screen
+﻿/// PlantCare AI — Scan Result Screen
 ///
 /// Displays the full AI plant health analysis returned from the backend.
 /// Shows health score gauge, plant identification, detected issues,
@@ -6,13 +6,15 @@
 
 import 'dart:io';
 import 'dart:math' as math;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/models/scan_result.dart';
 
 class ScanResultScreen extends StatefulWidget {
   final ScanResult result;
-  final File? imageFile;
+  final XFile? imageFile;
 
   const ScanResultScreen({
     super.key,
@@ -52,9 +54,6 @@ class _ScanResultScreenState extends State<ScanResultScreen>
     super.dispose();
   }
 
-  // -------------------------------------------------------
-  // Status color helper
-  // -------------------------------------------------------
   Color _statusColor(String status) {
     switch (status) {
       case 'healthy':
@@ -80,9 +79,6 @@ class _ScanResultScreenState extends State<ScanResultScreen>
     return const Color(0xFFC62828);
   }
 
-  // -------------------------------------------------------
-  // Build
-  // -------------------------------------------------------
   @override
   Widget build(BuildContext context) {
     final result = widget.result;
@@ -100,10 +96,15 @@ class _ScanResultScreenState extends State<ScanResultScreen>
             backgroundColor: statusColor,
             flexibleSpace: FlexibleSpaceBar(
               background: widget.imageFile != null
-                  ? Image.file(
-                      widget.imageFile!,
-                      fit: BoxFit.cover,
-                    )
+                  ? (kIsWeb
+                      ? Image.network(
+                          widget.imageFile!.path,
+                          fit: BoxFit.cover,
+                        )
+                      : Image.file(
+                          File(widget.imageFile!.path),
+                          fit: BoxFit.cover,
+                        ))
                   : Container(
                       color: statusColor.withOpacity(0.2),
                       child: Icon(
@@ -121,6 +122,31 @@ class _ScanResultScreenState extends State<ScanResultScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  // ---- Image Quality Warning ----
+                  if (result.imageQuality['quality'] != 'good' &&
+                      result.imageQuality['quality'] != 'acceptable')
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 20),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.shade50,
+                        border: Border.all(color: Colors.orange.shade300),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.warning_amber_rounded, color: Colors.orange.shade800),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              result.imageQuality['message'] ?? 'Image quality is poor. Analysis may be inaccurate.',
+                              style: TextStyle(color: Colors.orange.shade900, fontSize: 13),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
                   // ---- Plant Name + Status Badge ----
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -147,6 +173,14 @@ class _ScanResultScreenState extends State<ScanResultScreen>
                                 ),
                               ),
                             ],
+                            const SizedBox(height: 4),
+                            Text(
+                              'Confidence: ${(result.identificationConfidence * 100).toInt()}%',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textSecondary.withOpacity(0.7),
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -179,16 +213,17 @@ class _ScanResultScreenState extends State<ScanResultScreen>
                     animation: _scoreAnimation,
                     score: result.healthScore,
                     scoreColor: scoreColor,
+                    confidence: result.healthConfidence,
                   ),
                   const SizedBox(height: 24),
 
-                  // ---- AI Explanation ----
+                  // ---- Summary ----
                   _SectionCard(
                     icon: Icons.psychology_rounded,
                     iconColor: AppColors.primary,
-                    title: 'AI Analysis',
+                    title: 'Summary',
                     child: Text(
-                      result.aiExplanation,
+                      result.summary,
                       style: TextStyle(
                         color: AppColors.textSecondary,
                         height: 1.6,
@@ -197,56 +232,142 @@ class _ScanResultScreenState extends State<ScanResultScreen>
                   ),
                   const SizedBox(height: 16),
 
-                  // ---- Care Requirements Row ----
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _RequirementChip(
+                  // ---- Issues Detected ----
+                  if (result.issues.isNotEmpty) ...[
+                    _SectionCard(
+                      icon: Icons.healing_rounded,
+                      iconColor: Colors.red.shade600,
+                      title: 'Problems Detected',
+                      child: Column(
+                        children: result.issues.map((issue) {
+                          final Color sevColor = issue.severity.toLowerCase() == 'high'
+                              ? Colors.red.shade700
+                              : issue.severity.toLowerCase() == 'medium'
+                                  ? Colors.orange.shade700
+                                  : Colors.amber.shade700;
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 16),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: sevColor.withOpacity(0.05),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: sevColor.withOpacity(0.3)),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(Icons.warning_rounded, size: 16, color: sevColor),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        issue.name,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.textPrimary,
+                                        ),
+                                      ),
+                                    ),
+                                    Text(
+                                      issue.severity.toUpperCase(),
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                        color: sevColor,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                _BulletRow('Evidence: ', issue.evidence),
+                                _BulletRow('Possible Cause: ', issue.possibleCause),
+                                _BulletRow('Recommendation: ', issue.recommendation),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+
+                  // ---- Environment (Water/Light/Pest) ----
+                  _SectionCard(
+                    icon: Icons.eco_rounded,
+                    iconColor: Colors.green.shade600,
+                    title: 'Environment & Care',
+                    child: Column(
+                      children: [
+                        _EnvRow(
                           icon: Icons.water_drop_rounded,
-                          label: 'Water',
-                          value: result.waterRequirement,
                           color: Colors.blue.shade600,
+                          title: 'Water',
+                          desc: result.water['assessment'] ?? '',
+                          rec: result.water['recommendation'] ?? '',
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _RequirementChip(
+                        const Divider(height: 24),
+                        _EnvRow(
                           icon: Icons.wb_sunny_rounded,
-                          label: 'Light',
-                          value: result.lightRequirement,
-                          color: Colors.amber.shade700,
+                          color: Colors.amber.shade600,
+                          title: 'Light',
+                          desc: result.light['assessment'] ?? '',
+                          rec: result.light['recommendation'] ?? '',
                         ),
-                      ),
-                    ],
+                        const Divider(height: 24),
+                        _EnvRow(
+                          icon: Icons.bug_report_rounded,
+                          color: Colors.brown.shade600,
+                          title: 'Pests',
+                          desc: result.pests['assessment'] ?? '',
+                          rec: '',
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 16),
 
-                  // ---- Detected Issues ----
-                  if (result.detectedIssues.isNotEmpty) ...[
+                  // ---- Care Recommendations ----
+                  if (result.careRecommendations.isNotEmpty) ...[
                     _SectionCard(
-                      icon: Icons.warning_amber_rounded,
-                      iconColor: Colors.orange.shade700,
-                      title: 'Issues Detected',
+                      icon: Icons.tips_and_updates_rounded,
+                      iconColor: AppColors.primary,
+                      title: 'Actionable Steps',
                       child: Column(
-                        children: result.detectedIssues
+                        children: result.careRecommendations
+                            .asMap()
+                            .entries
                             .map(
-                              (issue) => Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 4),
+                              (entry) => Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 6),
                                 child: Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Icon(
-                                      Icons.circle,
-                                      size: 8,
-                                      color: Colors.orange.shade700,
+                                    Container(
+                                      width: 24,
+                                      height: 24,
+                                      decoration: BoxDecoration(
+                                        color: AppColors.primary.withOpacity(0.1),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          '${entry.key + 1}',
+                                          style: TextStyle(
+                                            color: AppColors.primary,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
                                     ),
-                                    const SizedBox(width: 10),
+                                    const SizedBox(width: 12),
                                     Expanded(
                                       child: Text(
-                                        issue,
+                                        entry.value,
                                         style: TextStyle(
                                           color: AppColors.textSecondary,
-                                          height: 1.4,
+                                          height: 1.5,
                                         ),
                                       ),
                                     ),
@@ -257,94 +378,8 @@ class _ScanResultScreenState extends State<ScanResultScreen>
                             .toList(),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 32),
                   ],
-
-                  // ---- Disease Detection ----
-                  if (result.detectedDisease != null) ...[
-                    _SectionCard(
-                      icon: Icons.coronavirus_rounded,
-                      iconColor: Colors.red.shade700,
-                      title: 'Disease Detected',
-                      child: Text(
-                        result.detectedDisease!,
-                        style: TextStyle(
-                          color: Colors.red.shade700,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                  ],
-
-                  // ---- Air Recommendation ----
-                  if (result.airRecommendation != null) ...[
-                    _SectionCard(
-                      icon: Icons.air_rounded,
-                      iconColor: Colors.teal.shade600,
-                      title: 'Air & Humidity',
-                      child: Text(
-                        result.airRecommendation!,
-                        style: TextStyle(
-                          color: AppColors.textSecondary,
-                          height: 1.5,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                  ],
-
-                  // ---- Care Recommendations ----
-                  _SectionCard(
-                    icon: Icons.tips_and_updates_rounded,
-                    iconColor: AppColors.primary,
-                    title: 'Care Recommendations',
-                    child: Column(
-                      children: result.careRecommendations
-                          .asMap()
-                          .entries
-                          .map(
-                            (entry) => Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 6),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Container(
-                                    width: 24,
-                                    height: 24,
-                                    decoration: BoxDecoration(
-                                      color: AppColors.primary.withOpacity(0.1),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        '${entry.key + 1}',
-                                        style: TextStyle(
-                                          color: AppColors.primary,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Text(
-                                      entry.value,
-                                      style: TextStyle(
-                                        color: AppColors.textSecondary,
-                                        height: 1.5,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          )
-                          .toList(),
-                    ),
-                  ),
-                  const SizedBox(height: 32),
 
                   // ---- Scan Again Button ----
                   ElevatedButton.icon(
@@ -371,6 +406,80 @@ class _ScanResultScreenState extends State<ScanResultScreen>
   }
 }
 
+class _BulletRow extends StatelessWidget {
+  final String label;
+  final String value;
+  const _BulletRow(this.label, this.value);
+
+  @override
+  Widget build(BuildContext context) {
+    if (value.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: RichText(
+        text: TextSpan(
+          style: TextStyle(color: AppColors.textSecondary, fontSize: 13, height: 1.4),
+          children: [
+            TextSpan(text: label, style: const TextStyle(fontWeight: FontWeight.bold)),
+            TextSpan(text: value),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _EnvRow extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final String title;
+  final String desc;
+  final String rec;
+
+  const _EnvRow({
+    required this.icon,
+    required this.color,
+    required this.title,
+    required this.desc,
+    required this.rec,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, color: color, size: 28),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+              ),
+              const SizedBox(height: 4),
+              if (desc.isNotEmpty)
+                Text(
+                  desc,
+                  style: TextStyle(color: AppColors.textSecondary, fontSize: 13, height: 1.4),
+                ),
+              if (rec.isNotEmpty) ...[
+                const SizedBox(height: 4),
+                Text(
+                  'Tip: $rec',
+                  style: TextStyle(color: color, fontSize: 13, fontWeight: FontWeight.w500, height: 1.4),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 // -------------------------------------------------------
 // Health Score Gauge Widget
 // -------------------------------------------------------
@@ -378,11 +487,13 @@ class _HealthScoreGauge extends StatelessWidget {
   final Animation<double> animation;
   final int score;
   final Color scoreColor;
+  final double confidence;
 
   const _HealthScoreGauge({
     required this.animation,
     required this.score,
     required this.scoreColor,
+    required this.confidence,
   });
 
   @override
@@ -441,6 +552,11 @@ class _HealthScoreGauge extends StatelessWidget {
                   ),
                 );
               },
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Confidence: ${(confidence * 100).toInt()}%',
+              style: TextStyle(fontSize: 11, color: AppColors.textSecondary.withOpacity(0.8)),
             ),
           ],
         ),
@@ -539,58 +655,6 @@ class _SectionCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             child,
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// -------------------------------------------------------
-// Requirement Chip
-// -------------------------------------------------------
-class _RequirementChip extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final Color color;
-
-  const _RequirementChip({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: color.withOpacity(0.08),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Icon(icon, color: color, size: 28),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: TextStyle(
-                color: AppColors.textSecondary,
-                fontSize: 12,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              value,
-              style: TextStyle(
-                color: color,
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-              ),
-              textAlign: TextAlign.center,
-            ),
           ],
         ),
       ),

@@ -2,42 +2,46 @@ import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/services/api_service.dart';
 import '../dashboard/dashboard_screen.dart';
-import 'register_screen.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  
   bool _isPasswordVisible = false;
   bool _isLoading = false;
 
   @override
   void dispose() {
+    _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
-  void _handleLogin() async {
+  void _handleRegister() async {
     if (_formKey.currentState?.validate() ?? false) {
       setState(() => _isLoading = true);
 
       try {
-        await ApiService.login(
-          _emailController.text.trim(),
-          _passwordController.text,
+        await ApiService.register(
+          fullName: _nameController.text.trim(),
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
         );
 
         if (mounted) {
-          Navigator.of(context).pushReplacement(
+          Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(builder: (_) => const DashboardScreen()),
+            (route) => false,
           );
         }
       } on ApiException catch (e) {
@@ -69,6 +73,11 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Create Account'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -79,30 +88,31 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Logo/Header
                   Icon(
                     Icons.eco_rounded,
-                    size: 80,
+                    size: 64,
                     color: AppColors.primary,
                   ),
+                  const SizedBox(height: 24),
+                  
+                  // Full Name Field
+                  TextFormField(
+                    controller: _nameController,
+                    decoration: InputDecoration(
+                      labelText: 'Full Name',
+                      prefixIcon: const Icon(Icons.person_outline),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Please enter your full name';
+                      }
+                      return null;
+                    },
+                  ),
                   const SizedBox(height: 16),
-                  Text(
-                    'Welcome Back',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Sign in to care for your plants',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 48),
                   
                   // Email Field
                   TextFormField(
@@ -118,6 +128,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your email';
+                      }
+                      if (!value.contains('@')) {
+                        return 'Please enter a valid email';
                       }
                       return null;
                     },
@@ -148,26 +161,17 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     obscureText: !_isPasswordVisible,
                     validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your password';
+                      if (value == null || value.length < 6) {
+                        return 'Password must be at least 6 characters';
                       }
                       return null;
                     },
                   ),
+                  const SizedBox(height: 32),
                   
-                  // Forgot Password
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () {},
-                      child: const Text('Forgot Password?'),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  
-                  // Login Button
+                  // Register Button
                   ElevatedButton(
-                    onPressed: _isLoading ? null : _handleLogin,
+                    onPressed: _isLoading ? null : _handleRegister,
                     child: _isLoading
                         ? const SizedBox(
                             height: 20,
@@ -177,24 +181,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                             ),
                           )
-                        : const Text('Sign In'),
-                  ),
-                  const SizedBox(height: 24),
-                  
-                  // Sign Up Link
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text('Don\'t have an account?'),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(builder: (_) => const RegisterScreen()),
-                          );
-                        },
-                        child: const Text('Sign Up'),
-                      ),
-                    ],
+                        : const Text('Sign Up'),
                   ),
                 ],
               ),

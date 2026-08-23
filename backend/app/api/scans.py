@@ -21,7 +21,7 @@ from app.database import get_db
 from app.models.user import User
 from app.models.plant import Plant
 from app.models.scan import PlantScan
-from app.auth.jwt_handler import get_current_user
+from app.auth.jwt_handler import get_current_user, get_optional_current_user
 from app.config import settings
 from app.services.ai_service import analyze_plant_image
 
@@ -29,9 +29,7 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["Scans"])
 
-ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/jpg"]
-
-
+# ALLOWED_IMAGE_TYPES removed to accept all images
 # ===========================
 # POST /scan  (standalone — no plant_id required)
 # ===========================
@@ -43,7 +41,7 @@ ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/jpg"]
 async def quick_scan(
     image: UploadFile = File(..., description="Plant image to analyze (JPEG, PNG, or WebP)"),
     db: Session = Depends(get_db),
-    current_user: Optional[User] = Depends(get_current_user),
+    current_user: Optional[User] = Depends(get_optional_current_user),
 ):
     """
     Upload a plant image and receive an instant AI health analysis.
@@ -54,10 +52,10 @@ async def quick_scan(
     - Does NOT require a plant to be pre-registered in your collection
     """
     # ---- Validate image type ----
-    if image.content_type not in ALLOWED_IMAGE_TYPES:
+    if image.content_type and not image.content_type.startswith("image/") and image.content_type != "application/octet-stream":
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid image type '{image.content_type}'. Allowed: JPEG, PNG, WebP",
+            detail=f"Invalid image type '{image.content_type}'. Please upload an image file.",
         )
 
     # ---- Read and validate file size ----
@@ -133,15 +131,31 @@ async def quick_scan(
         "scan_id": scan_id,
         "plant_name": analysis["plant_name"],
         "scientific_name": analysis.get("scientific_name"),
+        "identification_confidence": analysis.get("identification_confidence"),
+        
         "health_score": analysis["health_score"],
         "health_status": analysis["health_status"],
+        "health_confidence": analysis.get("health_confidence"),
+        "summary": analysis.get("summary"),
+        
+        "observations": analysis.get("observations"),
+        "issues": analysis.get("issues"),
+        
+        "water": analysis.get("water"),
+        "light": analysis.get("light"),
+        "pests": analysis.get("pests"),
+        
+        "care_recommendations": analysis["care_recommendations"],
+        "image_quality": analysis.get("image_quality"),
+
+        # Legacy fields
         "detected_issues": analysis["detected_issues"],
         "detected_disease": analysis.get("detected_disease"),
         "water_requirement": analysis["water_requirement"],
         "light_requirement": analysis["light_requirement"],
         "air_recommendation": analysis.get("air_recommendation"),
         "ai_explanation": analysis["ai_explanation"],
-        "care_recommendations": analysis["care_recommendations"],
+        
         "image_path": filepath,
         "scanned_at": datetime.now(timezone.utc).isoformat(),
     }
@@ -178,10 +192,10 @@ async def scan_plant(
         )
 
     # ---- Validate image ----
-    if image.content_type not in ALLOWED_IMAGE_TYPES:
+    if image.content_type and not image.content_type.startswith("image/") and image.content_type != "application/octet-stream":
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid image type. Allowed: JPEG, PNG, WebP",
+            detail="Invalid file type. Please upload an image file.",
         )
 
     content = await image.read()
@@ -237,15 +251,31 @@ async def scan_plant(
         "plant_id": plant_id,
         "plant_name": analysis["plant_name"],
         "scientific_name": analysis.get("scientific_name"),
+        "identification_confidence": analysis.get("identification_confidence"),
+        
         "health_score": analysis["health_score"],
         "health_status": analysis["health_status"],
+        "health_confidence": analysis.get("health_confidence"),
+        "summary": analysis.get("summary"),
+        
+        "observations": analysis.get("observations"),
+        "issues": analysis.get("issues"),
+        
+        "water": analysis.get("water"),
+        "light": analysis.get("light"),
+        "pests": analysis.get("pests"),
+        
+        "care_recommendations": analysis["care_recommendations"],
+        "image_quality": analysis.get("image_quality"),
+
+        # Legacy fields
         "detected_issues": analysis["detected_issues"],
         "detected_disease": analysis.get("detected_disease"),
         "water_requirement": analysis["water_requirement"],
         "light_requirement": analysis["light_requirement"],
         "air_recommendation": analysis.get("air_recommendation"),
         "ai_explanation": analysis["ai_explanation"],
-        "care_recommendations": analysis["care_recommendations"],
+        
         "scanned_at": scan.created_at.isoformat(),
     }
 

@@ -4,6 +4,7 @@
 /// backend analyzes it, then navigates to ScanResultScreen on success.
 
 import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../core/constants/app_colors.dart';
@@ -18,7 +19,7 @@ class ScanScreen extends StatefulWidget {
 }
 
 class _ScanScreenState extends State<ScanScreen> {
-  File? _selectedImage;
+  XFile? _selectedImage;
   bool _isAnalyzing = false;
   String _statusMessage = '';
   final ImagePicker _picker = ImagePicker();
@@ -36,7 +37,7 @@ class _ScanScreenState extends State<ScanScreen> {
       );
       if (picked != null) {
         setState(() {
-          _selectedImage = File(picked.path);
+          _selectedImage = picked;
           _statusMessage = '';
         });
       }
@@ -80,26 +81,25 @@ class _ScanScreenState extends State<ScanScreen> {
       }
     } on ApiException catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Analysis failed: ${e.message}'),
-            backgroundColor: Colors.red.shade700,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        _showError('Server Error ${e.statusCode}: ${e.message}', isWarning: false);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Error: $e\n\nMake sure the backend is running on localhost:8000',
-            ),
-            backgroundColor: Colors.orange.shade800,
-            behavior: SnackBarBehavior.floating,
-            duration: const Duration(seconds: 6),
-          ),
-        );
+        final errStr = e.toString();
+        // Distinguish connection errors from other errors
+        final isConnectionError = errStr.contains('Failed to fetch') ||
+            errStr.contains('Connection refused') ||
+            errStr.contains('SocketException') ||
+            errStr.contains('XMLHttpRequest');
+
+        if (isConnectionError) {
+          _showError(
+            '⚠️ Cannot connect to backend.\n\nMake sure the FastAPI server is running:\n  uvicorn app.main:app --reload --port 8000',
+            isWarning: true,
+          );
+        } else {
+          _showError('Unexpected error: $errStr', isWarning: true);
+        }
       }
     } finally {
       if (mounted) {
@@ -109,6 +109,17 @@ class _ScanScreenState extends State<ScanScreen> {
         });
       }
     }
+  }
+
+  void _showError(String message, {required bool isWarning}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isWarning ? Colors.orange.shade800 : Colors.red.shade700,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 8),
+      ),
+    );
   }
 
   // -------------------------------------------------------
@@ -225,11 +236,17 @@ class _ScanScreenState extends State<ScanScreen> {
     if (_selectedImage != null) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(16),
-        child: Image.file(
-          _selectedImage!,
-          fit: BoxFit.cover,
-          width: double.infinity,
-        ),
+        child: kIsWeb 
+            ? Image.network(
+                _selectedImage!.path,
+                fit: BoxFit.cover,
+                width: double.infinity,
+              )
+            : Image.file(
+                File(_selectedImage!.path),
+                fit: BoxFit.cover,
+                width: double.infinity,
+              ),
       );
     }
 

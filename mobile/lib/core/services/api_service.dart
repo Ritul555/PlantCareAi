@@ -9,8 +9,9 @@
 ///   POST /scan         — analyze plant image with AI
 
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io' show SocketException, TimeoutException;
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/scan_result.dart';
 
@@ -85,7 +86,7 @@ class ApiService {
     } else {
       throw ApiException(
         statusCode: response.statusCode,
-        message: data['detail'] as String? ?? 'Login failed',
+        message: _extractError(data['detail']) ?? 'Login failed',
       );
     }
   }
@@ -118,7 +119,7 @@ class ApiService {
     } else {
       throw ApiException(
         statusCode: response.statusCode,
-        message: data['detail'] as String? ?? 'Registration failed',
+        message: _extractError(data['detail']) ?? 'Registration failed',
       );
     }
   }
@@ -131,7 +132,7 @@ class ApiService {
   ///
   /// Calls POST /scan (standalone — no plant_id required).
   /// Returns a [ScanResult] with full health analysis.
-  static Future<ScanResult> scanPlant(File imageFile) async {
+  static Future<ScanResult> scanPlant(XFile imageFile) async {
     final token = await getToken();
 
     // Build multipart request
@@ -147,11 +148,13 @@ class ApiService {
 
     // Attach image file
     final mimeType = _getMimeType(imageFile.path);
+    final bytes = await imageFile.readAsBytes();
+    
     request.files.add(
-      await http.MultipartFile.fromPath(
+      http.MultipartFile.fromBytes(
         'image',
-        imageFile.path,
-        // contentType is inferred by the package
+        bytes,
+        filename: imageFile.name.isNotEmpty ? imageFile.name : 'upload.jpg',
       ),
     );
 
@@ -168,7 +171,7 @@ class ApiService {
     } else {
       throw ApiException(
         statusCode: response.statusCode,
-        message: data['detail'] as String? ?? 'Scan failed',
+        message: _extractError(data['detail']) ?? 'Scan failed',
       );
     }
   }
@@ -182,6 +185,21 @@ class ApiService {
     if (lower.endsWith('.png')) return 'image/png';
     if (lower.endsWith('.webp')) return 'image/webp';
     return 'image/jpeg';
+  }
+
+  /// Helper to safely extract error message from FastAPI responses
+  static String? _extractError(dynamic detail) {
+    if (detail == null) return null;
+    if (detail is String) return detail;
+    if (detail is List && detail.isNotEmpty) {
+      // FastAPI validation error format: [{"loc": ["body", "password"], "msg": "value is not a valid...", "type": "..."}]
+      final firstError = detail.first;
+      if (firstError is Map && firstError.containsKey('msg')) {
+        return firstError['msg'].toString();
+      }
+      return detail.toString();
+    }
+    return detail.toString();
   }
 }
 
