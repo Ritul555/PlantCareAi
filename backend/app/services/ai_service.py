@@ -92,7 +92,7 @@ def analyze_plant_image(image_bytes: bytes, content_type: str = "image/jpeg") ->
         safe_mime = content_type if content_type and content_type.startswith("image/") else "image/jpeg"
         image_part = types.Part.from_bytes(data=image_bytes, mime_type=safe_mime)
 
-        model = "gemini-3.6-flash"
+        model = "gemini-1.5-flash"
         logger.info(f"Sending {len(image_bytes)} bytes ({safe_mime}) to {model}...")
 
         response = client.models.generate_content(
