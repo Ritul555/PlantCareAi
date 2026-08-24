@@ -1,86 +1,29 @@
-import express, { Request, Response, NextFunction } from 'express';
-import cors from 'cors';
-import fs from 'fs';
-import path from 'path';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import multer from 'multer';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+const express = require('express');
+const cors = require('cors');
+const fs = require('fs');
+const path = require('path');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const multer = require('multer');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 // ==========================================
-// 1. CONFIGURATION & TYPES
+// 1. CONFIGURATION
 // ==========================================
 const SECRET_KEY = process.env.SECRET_KEY || 'plantcare-ai-super-secret-production-key-2026';
 const tokenExpireSeconds = parseInt(process.env.ACCESS_TOKEN_EXPIRE_MINUTES || '1440', 10) * 60;
 
-export interface UserRecord {
-  id: number;
-  email: string;
-  fullName: string;
-  hashedPassword: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface PlantRecord {
-  id: number;
-  userId: number;
-  name: string;
-  plantType?: string | null;
-  scientificName?: string | null;
-  description?: string | null;
-  location?: string | null;
-  category?: string | null;
-  currentStatus: string;
-  imageUrl?: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface PlantScanRecord {
-  id: number;
-  plantId?: number | null;
-  imagePath?: string | null;
-  scanType: string;
-  healthScore: number;
-  healthStatus: string;
-  identifiedPlantType?: string | null;
-  identificationConfidence?: number | null;
-  detectedDisease?: string | null;
-  diseaseConfidence?: number | null;
-  visualAnalysis?: string | null;
-  detectedIssues?: string | null;
-  aiExplanation?: string | null;
-  overallConfidence?: number | null;
-  createdAt: string;
-}
-
-interface DatabaseSchema {
-  users: UserRecord[];
-  plants: PlantRecord[];
-  scans: PlantScanRecord[];
-  counters: {
-    user: number;
-    plant: number;
-    scan: number;
-  };
-}
-
 // ==========================================
-// 2. SAFE IN-MEMORY & /tmp DATA LAYER
+// 2. RESILIENT DATA STORE (/tmp + In-Memory)
 // ==========================================
 class Database {
-  private filePath: string;
-  private data: DatabaseSchema;
-
   constructor() {
     const tmpDir = process.env.TMPDIR || process.env.TEMP || '/tmp';
     this.filePath = path.join(tmpDir, 'plantcare_db_store.json');
     this.data = this.loadData();
   }
 
-  private loadData(): DatabaseSchema {
+  loadData() {
     try {
       if (fs.existsSync(this.filePath)) {
         const raw = fs.readFileSync(this.filePath, 'utf-8');
@@ -97,7 +40,7 @@ class Database {
     };
   }
 
-  private saveData(): void {
+  saveData() {
     try {
       const dir = path.dirname(this.filePath);
       if (!fs.existsSync(dir)) {
@@ -105,25 +48,24 @@ class Database {
       }
       fs.writeFileSync(this.filePath, JSON.stringify(this.data, null, 2), 'utf-8');
     } catch (e) {
-      // In-memory data is still preserved even if file write is restricted
-      console.warn('Could not persist to file, data kept in memory:', e);
+      console.warn('Could not persist to file, data kept in memory:', e.message);
     }
   }
 
-  async findUserByEmail(email: string): Promise<UserRecord | null> {
+  async findUserByEmail(email) {
     const user = this.data.users.find(u => u.email.toLowerCase() === email.toLowerCase());
     return user ? { ...user } : null;
   }
 
-  async findUserById(id: number): Promise<UserRecord | null> {
+  async findUserById(id) {
     const user = this.data.users.find(u => u.id === id);
     return user ? { ...user } : null;
   }
 
-  async createUser(data: { email: string; fullName: string; hashedPassword: string }): Promise<UserRecord> {
+  async createUser(data) {
     this.data.counters.user += 1;
     const now = new Date().toISOString();
-    const newUser: UserRecord = {
+    const newUser = {
       id: this.data.counters.user,
       email: data.email,
       fullName: data.fullName,
@@ -137,30 +79,21 @@ class Database {
     return { ...newUser };
   }
 
-  async findPlantsByUserId(userId: number): Promise<PlantRecord[]> {
+  async findPlantsByUserId(userId) {
     return this.data.plants
       .filter(p => p.userId === userId)
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
 
-  async findPlantById(id: number, userId: number): Promise<PlantRecord | null> {
+  async findPlantById(id, userId) {
     const plant = this.data.plants.find(p => p.id === id && p.userId === userId);
     return plant ? { ...plant } : null;
   }
 
-  async createPlant(data: {
-    userId: number;
-    name: string;
-    plantType?: string | null;
-    scientificName?: string | null;
-    description?: string | null;
-    location?: string | null;
-    category?: string | null;
-    imageUrl?: string | null;
-  }): Promise<PlantRecord> {
+  async createPlant(data) {
     this.data.counters.plant += 1;
     const now = new Date().toISOString();
-    const newPlant: PlantRecord = {
+    const newPlant = {
       id: this.data.counters.plant,
       userId: data.userId,
       name: data.name,
@@ -179,7 +112,7 @@ class Database {
     return { ...newPlant };
   }
 
-  async updatePlantStatus(id: number, status: string): Promise<void> {
+  async updatePlantStatus(id, status) {
     const plant = this.data.plants.find(p => p.id === id);
     if (plant) {
       plant.currentStatus = status;
@@ -188,7 +121,7 @@ class Database {
     }
   }
 
-  async deletePlant(id: number, userId: number): Promise<boolean> {
+  async deletePlant(id, userId) {
     const index = this.data.plants.findIndex(p => p.id === id && p.userId === userId);
     if (index !== -1) {
       this.data.plants.splice(index, 1);
@@ -199,24 +132,10 @@ class Database {
     return false;
   }
 
-  async createScan(data: {
-    plantId?: number | null;
-    imagePath?: string | null;
-    scanType?: string;
-    healthScore: number;
-    healthStatus: string;
-    identifiedPlantType?: string | null;
-    identificationConfidence?: number | null;
-    detectedDisease?: string | null;
-    diseaseConfidence?: number | null;
-    visualAnalysis?: string | null;
-    detectedIssues?: string | null;
-    aiExplanation?: string | null;
-    overallConfidence?: number | null;
-  }): Promise<PlantScanRecord> {
+  async createScan(data) {
     this.data.counters.scan += 1;
     const now = new Date().toISOString();
-    const newScan: PlantScanRecord = {
+    const newScan = {
       id: this.data.counters.scan,
       plantId: data.plantId || null,
       imagePath: data.imagePath || null,
@@ -224,13 +143,13 @@ class Database {
       healthScore: data.healthScore,
       healthStatus: data.healthStatus,
       identifiedPlantType: data.identifiedPlantType || null,
-      identificationConfidence: data.identificationConfidence ?? 0.5,
+      identificationConfidence: data.identificationConfidence || 0.5,
       detectedDisease: data.detectedDisease || null,
-      diseaseConfidence: data.diseaseConfidence ?? 0.5,
+      diseaseConfidence: data.diseaseConfidence || 0.5,
       visualAnalysis: data.visualAnalysis || null,
       detectedIssues: data.detectedIssues || null,
       aiExplanation: data.aiExplanation || null,
-      overallConfidence: data.overallConfidence ?? 0.5,
+      overallConfidence: data.overallConfidence || 0.5,
       createdAt: now,
     };
     this.data.scans.push(newScan);
@@ -238,7 +157,7 @@ class Database {
     return { ...newScan };
   }
 
-  async getDashboardStats(userId: number) {
+  async getDashboardStats(userId) {
     const userPlants = this.data.plants.filter(p => p.userId === userId);
     const total = userPlants.length;
     const healthy = userPlants.filter(p => p.currentStatus === 'healthy').length;
@@ -261,7 +180,7 @@ class Database {
 const db = new Database();
 
 // ==========================================
-// 3. AI VISION SERVICE (GEMINI)
+// 3. AI VISION SERVICE
 // ==========================================
 const PLANT_ANALYSIS_PROMPT = `
 You are an expert botanist, plant pathologist, and horticulturist.
@@ -319,7 +238,7 @@ Respond ONLY with a valid JSON object — no markdown formatting, no backticks, 
 }
 `;
 
-async function analyzePlantImage(imageBuffer: Buffer, mimeType: string) {
+async function analyzePlantImage(imageBuffer, mimeType) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return getFallbackAnalysis('Gemini API key not configured');
@@ -348,15 +267,15 @@ async function analyzePlantImage(imageBuffer: Buffer, mimeType: string) {
 
     const parsed = JSON.parse(jsonMatch[0]);
     return normalizeAnalysis(parsed);
-  } catch (error: any) {
+  } catch (error) {
     console.error('Gemini Vision AI Analysis Error:', error?.message || error);
     return getFallbackAnalysis(error?.message);
   }
 }
 
-function normalizeAnalysis(data: any) {
+function normalizeAnalysis(data) {
   const issues = Array.isArray(data.issues)
-    ? data.issues.map((i: any) => {
+    ? data.issues.map(i => {
         if (typeof i === 'string') {
           return {
             name: i,
@@ -377,7 +296,7 @@ function normalizeAnalysis(data: any) {
     : [];
 
   const detectedIssues = issues.map(i => i.name);
-  const highSeverityIssue = issues.find(i => i.severity?.toLowerCase() === 'high');
+  const highSeverityIssue = issues.find(i => (i.severity || '').toLowerCase() === 'high');
 
   return {
     plant_name: data.plant_name || 'Houseplant',
@@ -416,7 +335,7 @@ function normalizeAnalysis(data: any) {
   };
 }
 
-function getFallbackAnalysis(errorMessage?: string) {
+function getFallbackAnalysis(errorMessage) {
   return {
     plant_name: 'Identified Foliage Plant',
     scientific_name: 'Plantae',
@@ -460,7 +379,7 @@ function getFallbackAnalysis(errorMessage?: string) {
 }
 
 // ==========================================
-// 4. EXPRESS APP & MIDDLEWARES
+// 4. EXPRESS APPLICATION
 // ==========================================
 const app = express();
 const upload = multer({
@@ -468,7 +387,6 @@ const upload = multer({
   limits: { fileSize: 10 * 1024 * 1024 }
 });
 
-// Permissive CORS
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
@@ -478,20 +396,15 @@ app.use(cors({
 app.use(express.json({ limit: '25mb' }));
 app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 
-// URL normalizer for Vercel rewrites (/api/xxx -> /xxx)
-app.use((req: Request, res: Response, next: NextFunction) => {
+// Strip /api prefix if present from Vercel rewrites
+app.use((req, res, next) => {
   if (req.url.startsWith('/api')) {
     req.url = req.url.replace(/^\/api/, '') || '/';
   }
   next();
 });
 
-// Auth middleware
-interface AuthRequest extends Request {
-  user?: any;
-}
-
-const authenticateToken = (req: AuthRequest, res: Response, next: NextFunction) => {
+const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
@@ -508,23 +421,12 @@ const authenticateToken = (req: AuthRequest, res: Response, next: NextFunction) 
   });
 };
 
-function tryGetUser(authHeader?: string) {
-  if (!authHeader) return null;
-  const token = authHeader.split(' ')[1];
-  if (!token) return null;
-  try {
-    return jwt.verify(token, SECRET_KEY) as { id: number; sub: string };
-  } catch {
-    return null;
-  }
-}
-
 // ==========================================
 // 5. ROUTES
 // ==========================================
 
-// Health checks
-app.get('/', (req: Request, res: Response) => {
+// Health Check
+app.get('/', (req, res) => {
   res.json({
     status: 'healthy',
     app: 'PlantCare AI',
@@ -534,12 +436,12 @@ app.get('/', (req: Request, res: Response) => {
   });
 });
 
-app.get('/health', (req: Request, res: Response) => {
+app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
 // Auth Routes
-app.post('/auth/register', async (req: Request, res: Response) => {
+app.post('/auth/register', async (req, res) => {
   try {
     const { email, password, full_name } = req.body || {};
     
@@ -570,13 +472,13 @@ app.post('/auth/register', async (req: Request, res: Response) => {
         full_name: user.fullName
       }
     });
-  } catch (err: any) {
+  } catch (err) {
     console.error('Register error:', err);
     return res.status(500).json({ detail: 'Internal server error' });
   }
 });
 
-app.post('/auth/login', async (req: Request, res: Response) => {
+app.post('/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body || {};
     
@@ -605,24 +507,24 @@ app.post('/auth/login', async (req: Request, res: Response) => {
         full_name: user.fullName
       }
     });
-  } catch (err: any) {
+  } catch (err) {
     console.error('Login error:', err);
     return res.status(500).json({ detail: 'Internal server error' });
   }
 });
 
-// Plants Routes
-app.get('/plants/dashboard', authenticateToken, async (req: AuthRequest, res: Response) => {
+// Plant Routes
+app.get('/plants/dashboard', authenticateToken, async (req, res) => {
   try {
     const stats = await db.getDashboardStats(req.user.id);
     return res.json(stats);
-  } catch (err: any) {
+  } catch (err) {
     console.error('Dashboard error:', err);
     return res.status(500).json({ detail: 'Internal server error' });
   }
 });
 
-app.get('/plants', authenticateToken, async (req: AuthRequest, res: Response) => {
+app.get('/plants', authenticateToken, async (req, res) => {
   try {
     const plants = await db.findPlantsByUserId(req.user.id);
     return res.json({
@@ -640,13 +542,13 @@ app.get('/plants', authenticateToken, async (req: AuthRequest, res: Response) =>
       })),
       total: plants.length
     });
-  } catch (err: any) {
+  } catch (err) {
     console.error('Get plants error:', err);
     return res.status(500).json({ detail: 'Internal server error' });
   }
 });
 
-app.post('/plants', authenticateToken, async (req: AuthRequest, res: Response) => {
+app.post('/plants', authenticateToken, async (req, res) => {
   try {
     const { name, plant_type, scientific_name, description, location, category, image_url } = req.body || {};
     
@@ -677,13 +579,13 @@ app.post('/plants', authenticateToken, async (req: AuthRequest, res: Response) =
       image_url: plant.imageUrl,
       created_at: plant.createdAt
     });
-  } catch (err: any) {
+  } catch (err) {
     console.error('Create plant error:', err);
     return res.status(500).json({ detail: 'Internal server error' });
   }
 });
 
-app.get('/plants/:id', authenticateToken, async (req: AuthRequest, res: Response) => {
+app.get('/plants/:id', authenticateToken, async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
     const plant = await db.findPlantById(id, req.user.id);
@@ -704,13 +606,13 @@ app.get('/plants/:id', authenticateToken, async (req: AuthRequest, res: Response
       image_url: plant.imageUrl,
       created_at: plant.createdAt
     });
-  } catch (err: any) {
+  } catch (err) {
     console.error('Get plant error:', err);
     return res.status(500).json({ detail: 'Internal server error' });
   }
 });
 
-app.delete('/plants/:id', authenticateToken, async (req: AuthRequest, res: Response) => {
+app.delete('/plants/:id', authenticateToken, async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
     const deleted = await db.deletePlant(id, req.user.id);
@@ -720,14 +622,14 @@ app.delete('/plants/:id', authenticateToken, async (req: AuthRequest, res: Respo
     }
 
     return res.status(204).send();
-  } catch (err: any) {
+  } catch (err) {
     console.error('Delete plant error:', err);
     return res.status(500).json({ detail: 'Internal server error' });
   }
 });
 
 // Scan Routes (Standalone Scan)
-app.post('/scan', upload.single('image'), async (req: AuthRequest, res: Response) => {
+app.post('/scan', upload.single('image'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ detail: 'Image file is required' });
@@ -772,14 +674,14 @@ app.post('/scan', upload.single('image'), async (req: AuthRequest, res: Response
       ai_explanation: analysis.ai_explanation,
       scanned_at: scan.createdAt,
     });
-  } catch (err: any) {
+  } catch (err) {
     console.error('Scan error:', err);
     return res.status(500).json({ detail: err.message || 'AI analysis failed' });
   }
 });
 
 // Scan Plant by ID
-app.post('/plants/:id/scan', authenticateToken, upload.single('image'), async (req: AuthRequest, res: Response) => {
+app.post('/plants/:id/scan', authenticateToken, upload.single('image'), async (req, res) => {
   try {
     const plantId = parseInt(req.params.id, 10);
     const userId = req.user.id;
@@ -834,23 +736,23 @@ app.post('/plants/:id/scan', authenticateToken, upload.single('image'), async (r
       ai_explanation: analysis.ai_explanation,
       scanned_at: scan.createdAt,
     });
-  } catch (err: any) {
+  } catch (err) {
     console.error('Plant scan error:', err);
     return res.status(500).json({ detail: err.message || 'AI analysis failed' });
   }
 });
 
 // Fallback 404
-app.use((req: Request, res: Response) => {
+app.use((req, res) => {
   res.status(404).json({ detail: `Route ${req.method} ${req.path} not found` });
 });
 
 // Global error handler
-app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+app.use((err, req, res, next) => {
   console.error('Express Error:', err);
   res.status(err.status || 500).json({
     detail: err.message || 'Internal Server Error',
   });
 });
 
-export default app;
+module.exports = app;

@@ -2,11 +2,7 @@
   "name": "plantcare-ai",
   "version": "1.0.0",
   "description": "PlantCare AI Backend API",
-  "main": "api/index.ts",
-  "scripts": {
-    "start": "node backend/dist/index.js",
-    "build": "tsc"
-  },
+  "main": "api/index.js",
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
     "bcryptjs": "^2.4.3",
@@ -15,14 +11,5 @@
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.1"
-  },
-  "devDependencies": {
-    "@types/bcryptjs": "^2.4.6",
-    "@types/cors": "^2.8.17",
-    "@types/express": "^4.17.21",
-    "@types/jsonwebtoken": "^9.0.6",
-    "@types/multer": "^1.4.11",
-    "@types/node": "^20.11.24",
-    "typescript": "^5.3.3"
   }
 }
