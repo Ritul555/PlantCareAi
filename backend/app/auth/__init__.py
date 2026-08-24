@@ -1,3 +1,0 @@
-"""
-PlantCare AI — Auth Package
-"""

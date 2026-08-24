@@ -1,3 +1,0 @@
-"""
-PlantCare AI — API Package
-"""
