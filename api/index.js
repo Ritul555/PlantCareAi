@@ -1,20 +1,31 @@
-const express = require('express');
-const cors = require('cors');
+// ==========================================
+// VERCEL SERVERLESS EXPRESS API ENTRYPOINT
+// ==========================================
+
+let express, cors, bcrypt, jwt, multer;
+let initError = null;
+let app = null;
+
+try {
+  express = require('express');
+  cors = require('cors');
+  bcrypt = require('bcryptjs');
+  jwt = require('jsonwebtoken');
+  multer = require('multer');
+} catch (err) {
+  initError = err;
+  console.error('Failed to load dependencies:', err);
+}
+
 const fs = require('fs');
 const path = require('path');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const multer = require('multer');
 
-// ==========================================
-// 1. CONFIGURATION
-// ==========================================
 const SECRET_KEY = process.env.SECRET_KEY || 'plantcare-ai-super-secret-production-key-2026';
 const tokenExpireSeconds = parseInt(process.env.ACCESS_TOKEN_EXPIRE_MINUTES || '1440', 10) * 60;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
 
 // ==========================================
-// 2. RESILIENT DATA STORE (/tmp + In-Memory)
+// 1. DATA STORE (/tmp + In-Memory)
 // ==========================================
 class Database {
   constructor() {
@@ -180,7 +191,7 @@ class Database {
 const db = new Database();
 
 // ==========================================
-// 3. AI VISION SERVICE (NATIVE HTTPS FETCH)
+// 2. AI VISION SERVICE
 // ==========================================
 const PLANT_ANALYSIS_PROMPT = `
 You are an expert botanist, plant pathologist, and horticulturist.
@@ -399,392 +410,397 @@ function getFallbackAnalysis(errorMessage) {
 }
 
 // ==========================================
-// 4. EXPRESS APPLICATION
+// 3. INITIALIZE EXPRESS
 // ==========================================
-const app = express();
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 }
-});
+if (!initError && express) {
+  app = express();
+  const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 10 * 1024 * 1024 }
+  });
 
-app.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin', 'X-Requested-With'],
-}));
+  app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin', 'X-Requested-With'],
+  }));
 
-app.use(express.json({ limit: '25mb' }));
-app.use(express.urlencoded({ extended: true, limit: '25mb' }));
+  app.use(express.json({ limit: '25mb' }));
+  app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 
-// Strip /api prefix if present from Vercel rewrites
-app.use((req, res, next) => {
-  if (req.url.startsWith('/api')) {
-    req.url = req.url.replace(/^\/api/, '') || '/';
-  }
-  next();
-});
-
-const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
-
-  if (!token) {
-    return res.status(401).json({ detail: 'Not authenticated' });
-  }
-
-  jwt.verify(token, SECRET_KEY, (err, user) => {
-    if (err) {
-      return res.status(401).json({ detail: 'Invalid token' });
+  // Normalize /api path
+  app.use((req, res, next) => {
+    if (req.url.startsWith('/api')) {
+      req.url = req.url.replace(/^\/api/, '') || '/';
     }
-    req.user = user;
     next();
   });
-};
 
-// ==========================================
-// 5. ROUTES
-// ==========================================
+  const authenticateToken = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
 
-// Health Check
-app.get('/', (req, res) => {
-  res.json({
-    status: 'healthy',
-    app: 'PlantCare AI',
-    framework: 'Node.js (Express)',
-    version: '1.0.0',
-    timestamp: new Date().toISOString(),
-  });
-});
-
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok' });
-});
-
-// Auth Routes
-app.post('/auth/register', async (req, res) => {
-  try {
-    const { email, password, full_name } = req.body || {};
-    
-    if (!email || !password || !full_name) {
-      return res.status(400).json({ detail: 'Full name, email, and password are required' });
+    if (!token) {
+      return res.status(401).json({ detail: 'Not authenticated' });
     }
 
-    const existingUser = await db.findUserByEmail(email);
-    if (existingUser) {
-      return res.status(400).json({ detail: 'Email already registered' });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await db.createUser({
-      email,
-      fullName: full_name,
-      hashedPassword,
-    });
-
-    const token = jwt.sign({ sub: user.email, id: user.id }, SECRET_KEY, { expiresIn: tokenExpireSeconds });
-    
-    return res.status(201).json({
-      access_token: token,
-      token_type: 'bearer',
-      user: {
-        id: user.id,
-        email: user.email,
-        full_name: user.fullName
+    jwt.verify(token, SECRET_KEY, (err, user) => {
+      if (err) {
+        return res.status(401).json({ detail: 'Invalid token' });
       }
+      req.user = user;
+      next();
     });
-  } catch (err) {
-    console.error('Register error:', err);
-    return res.status(500).json({ detail: 'Internal server error' });
-  }
-});
+  };
 
-app.post('/auth/login', async (req, res) => {
-  try {
-    const { email, password } = req.body || {};
-    
-    if (!email || !password) {
-      return res.status(400).json({ detail: 'Email and password are required' });
-    }
-
-    const user = await db.findUserByEmail(email);
-    if (!user) {
-      return res.status(401).json({ detail: 'Incorrect email or password' });
-    }
-
-    const isValid = await bcrypt.compare(password, user.hashedPassword);
-    if (!isValid) {
-      return res.status(401).json({ detail: 'Incorrect email or password' });
-    }
-
-    const token = jwt.sign({ sub: user.email, id: user.id }, SECRET_KEY, { expiresIn: tokenExpireSeconds });
-    
-    return res.json({
-      access_token: token,
-      token_type: 'bearer',
-      user: {
-        id: user.id,
-        email: user.email,
-        full_name: user.fullName
-      }
+  // Health
+  app.get('/', (req, res) => {
+    res.json({
+      status: 'healthy',
+      app: 'PlantCare AI',
+      framework: 'Node.js (Express)',
+      version: '1.0.0',
+      timestamp: new Date().toISOString(),
     });
-  } catch (err) {
-    console.error('Login error:', err);
-    return res.status(500).json({ detail: 'Internal server error' });
-  }
-});
-
-// Plant Routes
-app.get('/plants/dashboard', authenticateToken, async (req, res) => {
-  try {
-    const stats = await db.getDashboardStats(req.user.id);
-    return res.json(stats);
-  } catch (err) {
-    console.error('Dashboard error:', err);
-    return res.status(500).json({ detail: 'Internal server error' });
-  }
-});
-
-app.get('/plants', authenticateToken, async (req, res) => {
-  try {
-    const plants = await db.findPlantsByUserId(req.user.id);
-    return res.json({
-      plants: plants.map(p => ({
-        id: p.id,
-        name: p.name,
-        plant_type: p.plantType,
-        scientific_name: p.scientificName,
-        description: p.description,
-        location: p.location,
-        category: p.category,
-        current_status: p.currentStatus,
-        image_url: p.imageUrl,
-        created_at: p.createdAt
-      })),
-      total: plants.length
-    });
-  } catch (err) {
-    console.error('Get plants error:', err);
-    return res.status(500).json({ detail: 'Internal server error' });
-  }
-});
-
-app.post('/plants', authenticateToken, async (req, res) => {
-  try {
-    const { name, plant_type, scientific_name, description, location, category, image_url } = req.body || {};
-    
-    if (!name) {
-      return res.status(400).json({ detail: 'Plant name is required' });
-    }
-
-    const plant = await db.createPlant({
-      userId: req.user.id,
-      name,
-      plantType: plant_type,
-      scientificName: scientific_name,
-      description,
-      location,
-      category,
-      imageUrl: image_url
-    });
-
-    return res.status(201).json({
-      id: plant.id,
-      name: plant.name,
-      plant_type: plant.plantType,
-      scientific_name: plant.scientificName,
-      description: plant.description,
-      location: plant.location,
-      category: plant.category,
-      current_status: plant.currentStatus,
-      image_url: plant.imageUrl,
-      created_at: plant.createdAt
-    });
-  } catch (err) {
-    console.error('Create plant error:', err);
-    return res.status(500).json({ detail: 'Internal server error' });
-  }
-});
-
-app.get('/plants/:id', authenticateToken, async (req, res) => {
-  try {
-    const id = parseInt(req.params.id, 10);
-    const plant = await db.findPlantById(id, req.user.id);
-
-    if (!plant) {
-      return res.status(404).json({ detail: 'Plant not found' });
-    }
-
-    return res.json({
-      id: plant.id,
-      name: plant.name,
-      plant_type: plant.plantType,
-      scientific_name: plant.scientificName,
-      description: plant.description,
-      location: plant.location,
-      category: plant.category,
-      current_status: plant.currentStatus,
-      image_url: plant.imageUrl,
-      created_at: plant.createdAt
-    });
-  } catch (err) {
-    console.error('Get plant error:', err);
-    return res.status(500).json({ detail: 'Internal server error' });
-  }
-});
-
-app.delete('/plants/:id', authenticateToken, async (req, res) => {
-  try {
-    const id = parseInt(req.params.id, 10);
-    const deleted = await db.deletePlant(id, req.user.id);
-
-    if (!deleted) {
-      return res.status(404).json({ detail: 'Plant not found' });
-    }
-
-    return res.status(204).send();
-  } catch (err) {
-    console.error('Delete plant error:', err);
-    return res.status(500).json({ detail: 'Internal server error' });
-  }
-});
-
-// Scan Routes (Standalone Scan)
-app.post('/scan', upload.single('image'), async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ detail: 'Image file is required' });
-    }
-
-    const analysis = await analyzePlantImage(req.file.buffer, req.file.mimetype);
-
-    const scan = await db.createScan({
-      plantId: null,
-      scanType: 'quick_scan',
-      healthScore: analysis.health_score,
-      healthStatus: analysis.health_status,
-      identifiedPlantType: analysis.plant_name,
-      identificationConfidence: analysis.identification_confidence,
-      detectedDisease: analysis.detected_disease,
-      visualAnalysis: JSON.stringify(analysis.observations),
-      detectedIssues: JSON.stringify(analysis.detected_issues),
-      aiExplanation: analysis.summary,
-    });
-
-    return res.json({
-      scan_id: scan.id,
-      plant_id: null,
-      plant_name: analysis.plant_name,
-      scientific_name: analysis.scientific_name,
-      identification_confidence: analysis.identification_confidence,
-      health_score: analysis.health_score,
-      health_status: analysis.health_status,
-      health_confidence: analysis.health_confidence,
-      summary: analysis.summary,
-      observations: analysis.observations,
-      issues: analysis.issues,
-      water: analysis.water,
-      light: analysis.light,
-      pests: analysis.pests,
-      image_quality: analysis.image_quality,
-      care_recommendations: analysis.care_recommendations,
-      detected_issues: analysis.detected_issues,
-      detected_disease: analysis.detected_disease,
-      water_requirement: analysis.water_requirement,
-      light_requirement: analysis.light_requirement,
-      ai_explanation: analysis.ai_explanation,
-      scanned_at: scan.createdAt,
-    });
-  } catch (err) {
-    console.error('Scan error:', err);
-    return res.status(500).json({ detail: err.message || 'AI analysis failed' });
-  }
-});
-
-// Scan Plant by ID
-app.post('/plants/:id/scan', authenticateToken, upload.single('image'), async (req, res) => {
-  try {
-    const plantId = parseInt(req.params.id, 10);
-    const userId = req.user.id;
-
-    const plant = await db.findPlantById(plantId, userId);
-    if (!plant) {
-      return res.status(404).json({ detail: 'Plant not found' });
-    }
-
-    if (!req.file) {
-      return res.status(400).json({ detail: 'Image file is required' });
-    }
-
-    const analysis = await analyzePlantImage(req.file.buffer, req.file.mimetype);
-
-    const scan = await db.createScan({
-      plantId,
-      scanType: 'manual',
-      healthScore: analysis.health_score,
-      healthStatus: analysis.health_status,
-      identifiedPlantType: analysis.plant_name,
-      identificationConfidence: analysis.identification_confidence,
-      detectedDisease: analysis.detected_disease,
-      visualAnalysis: JSON.stringify(analysis.observations),
-      detectedIssues: JSON.stringify(analysis.detected_issues),
-      aiExplanation: analysis.summary,
-    });
-
-    await db.updatePlantStatus(plantId, analysis.health_status);
-
-    return res.json({
-      scan_id: scan.id,
-      plant_id: plantId,
-      plant_name: analysis.plant_name,
-      scientific_name: analysis.scientific_name,
-      identification_confidence: analysis.identification_confidence,
-      health_score: analysis.health_score,
-      health_status: analysis.health_status,
-      health_confidence: analysis.health_confidence,
-      summary: analysis.summary,
-      observations: analysis.observations,
-      issues: analysis.issues,
-      water: analysis.water,
-      light: analysis.light,
-      pests: analysis.pests,
-      image_quality: analysis.image_quality,
-      care_recommendations: analysis.care_recommendations,
-      detected_issues: analysis.detected_issues,
-      detected_disease: analysis.detected_disease,
-      water_requirement: analysis.water_requirement,
-      light_requirement: analysis.light_requirement,
-      ai_explanation: analysis.ai_explanation,
-      scanned_at: scan.createdAt,
-    });
-  } catch (err) {
-    console.error('Plant scan error:', err);
-    return res.status(500).json({ detail: err.message || 'AI analysis failed' });
-  }
-});
-
-// Fallback 404
-app.use((req, res) => {
-  res.status(404).json({ detail: `Route ${req.method} ${req.path} not found` });
-});
-
-// Global error handler
-app.use((err, req, res, next) => {
-  console.error('Express Error:', err);
-  res.status(err.status || 500).json({
-    detail: err.message || 'Internal Server Error',
   });
-});
 
-// Export handler wrapped in safe try/catch for Vercel
+  app.get('/health', (req, res) => {
+    res.json({ status: 'ok' });
+  });
+
+  // Auth Routes
+  app.post('/auth/register', async (req, res) => {
+    try {
+      const { email, password, full_name } = req.body || {};
+      
+      if (!email || !password || !full_name) {
+        return res.status(400).json({ detail: 'Full name, email, and password are required' });
+      }
+
+      const existingUser = await db.findUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ detail: 'Email already registered' });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const user = await db.createUser({
+        email,
+        fullName: full_name,
+        hashedPassword,
+      });
+
+      const token = jwt.sign({ sub: user.email, id: user.id }, SECRET_KEY, { expiresIn: tokenExpireSeconds });
+      
+      return res.status(201).json({
+        access_token: token,
+        token_type: 'bearer',
+        user: {
+          id: user.id,
+          email: user.email,
+          full_name: user.fullName
+        }
+      });
+    } catch (err) {
+      console.error('Register error:', err);
+      return res.status(500).json({ detail: 'Internal server error' });
+    }
+  });
+
+  app.post('/auth/login', async (req, res) => {
+    try {
+      const { email, password } = req.body || {};
+      
+      if (!email || !password) {
+        return res.status(400).json({ detail: 'Email and password are required' });
+      }
+
+      const user = await db.findUserByEmail(email);
+      if (!user) {
+        return res.status(401).json({ detail: 'Incorrect email or password' });
+      }
+
+      const isValid = await bcrypt.compare(password, user.hashedPassword);
+      if (!isValid) {
+        return res.status(401).json({ detail: 'Incorrect email or password' });
+      }
+
+      const token = jwt.sign({ sub: user.email, id: user.id }, SECRET_KEY, { expiresIn: tokenExpireSeconds });
+      
+      return res.json({
+        access_token: token,
+        token_type: 'bearer',
+        user: {
+          id: user.id,
+          email: user.email,
+          full_name: user.fullName
+        }
+      });
+    } catch (err) {
+      console.error('Login error:', err);
+      return res.status(500).json({ detail: 'Internal server error' });
+    }
+  });
+
+  // Plants Routes
+  app.get('/plants/dashboard', authenticateToken, async (req, res) => {
+    try {
+      const stats = await db.getDashboardStats(req.user.id);
+      return res.json(stats);
+    } catch (err) {
+      console.error('Dashboard error:', err);
+      return res.status(500).json({ detail: 'Internal server error' });
+    }
+  });
+
+  app.get('/plants', authenticateToken, async (req, res) => {
+    try {
+      const plants = await db.findPlantsByUserId(req.user.id);
+      return res.json({
+        plants: plants.map(p => ({
+          id: p.id,
+          name: p.name,
+          plant_type: p.plantType,
+          scientific_name: p.scientificName,
+          description: p.description,
+          location: p.location,
+          category: p.category,
+          current_status: p.currentStatus,
+          image_url: p.imageUrl,
+          created_at: p.createdAt
+        })),
+        total: plants.length
+      });
+    } catch (err) {
+      console.error('Get plants error:', err);
+      return res.status(500).json({ detail: 'Internal server error' });
+    }
+  });
+
+  app.post('/plants', authenticateToken, async (req, res) => {
+    try {
+      const { name, plant_type, scientific_name, description, location, category, image_url } = req.body || {};
+      
+      if (!name) {
+        return res.status(400).json({ detail: 'Plant name is required' });
+      }
+
+      const plant = await db.createPlant({
+        userId: req.user.id,
+        name,
+        plantType: plant_type,
+        scientificName: scientific_name,
+        description,
+        location,
+        category,
+        imageUrl: image_url
+      });
+
+      return res.status(201).json({
+        id: plant.id,
+        name: plant.name,
+        plant_type: plant.plantType,
+        scientific_name: plant.scientificName,
+        description: plant.description,
+        location: plant.location,
+        category: plant.category,
+        current_status: plant.currentStatus,
+        image_url: plant.imageUrl,
+        created_at: plant.createdAt
+      });
+    } catch (err) {
+      console.error('Create plant error:', err);
+      return res.status(500).json({ detail: 'Internal server error' });
+    }
+  });
+
+  app.get('/plants/:id', authenticateToken, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      const plant = await db.findPlantById(id, req.user.id);
+
+      if (!plant) {
+        return res.status(404).json({ detail: 'Plant not found' });
+      }
+
+      return res.json({
+        id: plant.id,
+        name: plant.name,
+        plant_type: plant.plantType,
+        scientific_name: plant.scientificName,
+        description: plant.description,
+        location: plant.location,
+        category: plant.category,
+        current_status: plant.currentStatus,
+        image_url: plant.imageUrl,
+        created_at: plant.createdAt
+      });
+    } catch (err) {
+      console.error('Get plant error:', err);
+      return res.status(500).json({ detail: 'Internal server error' });
+    }
+  });
+
+  app.delete('/plants/:id', authenticateToken, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      const deleted = await db.deletePlant(id, req.user.id);
+
+      if (!deleted) {
+        return res.status(404).json({ detail: 'Plant not found' });
+      }
+
+      return res.status(204).send();
+    } catch (err) {
+      console.error('Delete plant error:', err);
+      return res.status(500).json({ detail: 'Internal server error' });
+    }
+  });
+
+  // Scan Routes
+  app.post('/scan', upload.single('image'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ detail: 'Image file is required' });
+      }
+
+      const analysis = await analyzePlantImage(req.file.buffer, req.file.mimetype);
+
+      const scan = await db.createScan({
+        plantId: null,
+        scanType: 'quick_scan',
+        healthScore: analysis.health_score,
+        healthStatus: analysis.health_status,
+        identifiedPlantType: analysis.plant_name,
+        identificationConfidence: analysis.identification_confidence,
+        detectedDisease: analysis.detected_disease,
+        visualAnalysis: JSON.stringify(analysis.observations),
+        detectedIssues: JSON.stringify(analysis.detected_issues),
+        aiExplanation: analysis.summary,
+      });
+
+      return res.json({
+        scan_id: scan.id,
+        plant_id: null,
+        plant_name: analysis.plant_name,
+        scientific_name: analysis.scientific_name,
+        identification_confidence: analysis.identification_confidence,
+        health_score: analysis.health_score,
+        health_status: analysis.health_status,
+        health_confidence: analysis.health_confidence,
+        summary: analysis.summary,
+        observations: analysis.observations,
+        issues: analysis.issues,
+        water: analysis.water,
+        light: analysis.light,
+        pests: analysis.pests,
+        image_quality: analysis.image_quality,
+        care_recommendations: analysis.care_recommendations,
+        detected_issues: analysis.detected_issues,
+        detected_disease: analysis.detected_disease,
+        water_requirement: analysis.water_requirement,
+        light_requirement: analysis.light_requirement,
+        ai_explanation: analysis.ai_explanation,
+        scanned_at: scan.createdAt,
+      });
+    } catch (err) {
+      console.error('Scan error:', err);
+      return res.status(500).json({ detail: err.message || 'AI analysis failed' });
+    }
+  });
+
+  app.post('/plants/:id/scan', authenticateToken, upload.single('image'), async (req, res) => {
+    try {
+      const plantId = parseInt(req.params.id, 10);
+      const userId = req.user.id;
+
+      const plant = await db.findPlantById(plantId, userId);
+      if (!plant) {
+        return res.status(404).json({ detail: 'Plant not found' });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ detail: 'Image file is required' });
+      }
+
+      const analysis = await analyzePlantImage(req.file.buffer, req.file.mimetype);
+
+      const scan = await db.createScan({
+        plantId,
+        scanType: 'manual',
+        healthScore: analysis.health_score,
+        healthStatus: analysis.health_status,
+        identifiedPlantType: analysis.plant_name,
+        identificationConfidence: analysis.identification_confidence,
+        detectedDisease: analysis.detected_disease,
+        visualAnalysis: JSON.stringify(analysis.observations),
+        detectedIssues: JSON.stringify(analysis.detected_issues),
+        aiExplanation: analysis.summary,
+      });
+
+      await db.updatePlantStatus(plantId, analysis.health_status);
+
+      return res.json({
+        scan_id: scan.id,
+        plant_id: plantId,
+        plant_name: analysis.plant_name,
+        scientific_name: analysis.scientific_name,
+        identification_confidence: analysis.identification_confidence,
+        health_score: analysis.health_score,
+        health_status: analysis.health_status,
+        health_confidence: analysis.health_confidence,
+        summary: analysis.summary,
+        observations: analysis.observations,
+        issues: analysis.issues,
+        water: analysis.water,
+        light: analysis.light,
+        pests: analysis.pests,
+        image_quality: analysis.image_quality,
+        care_recommendations: analysis.care_recommendations,
+        detected_issues: analysis.detected_issues,
+        detected_disease: analysis.detected_disease,
+        water_requirement: analysis.water_requirement,
+        light_requirement: analysis.light_requirement,
+        ai_explanation: analysis.ai_explanation,
+        scanned_at: scan.createdAt,
+      });
+    } catch (err) {
+      console.error('Plant scan error:', err);
+      return res.status(500).json({ detail: err.message || 'AI analysis failed' });
+    }
+  });
+
+  app.use((req, res) => {
+    res.status(404).json({ detail: `Route ${req.method} ${req.path} not found` });
+  });
+
+  app.use((err, req, res, next) => {
+    console.error('Express Error:', err);
+    res.status(err.status || 500).json({
+      detail: err.message || 'Internal Server Error',
+    });
+  });
+}
+
+// Universal Serverless Handler
 module.exports = (req, res) => {
-  try {
-    return app(req, res);
-  } catch (err) {
+  if (initError) {
     res.statusCode = 500;
     res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify({
-      detail: err.message || 'Serverless invocation error',
-      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    return res.end(JSON.stringify({
+      error: 'Initialization Error',
+      message: initError.message,
+      stack: initError.stack
     }));
   }
+
+  if (!app) {
+    res.statusCode = 500;
+    res.setHeader('Content-Type', 'application/json');
+    return res.end(JSON.stringify({
+      error: 'App not initialized',
+      detail: 'Express app instance is null'
+    }));
+  }
+
+  return app(req, res);
 };
