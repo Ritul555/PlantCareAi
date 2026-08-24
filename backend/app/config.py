@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     ALLOWED_ORIGINS: str = "http://localhost:3000,http://localhost:8080"
 
     # ---- Database ----
-    DATABASE_URL: str = "postgresql://plantcare_user:plantcare_pass@localhost:5432/plantcare_db"
+    DATABASE_URL: str = "sqlite:////tmp/plantcare_dev.db" if os.environ.get("VERCEL") else "postgresql://plantcare_user:plantcare_pass@localhost:5432/plantcare_db"
 
     # ---- Authentication ----
     SECRET_KEY: str = "dev-secret-key-change-in-production"
@@ -31,7 +31,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440  # 24 hours
 
     # ---- File Uploads ----
-    UPLOAD_DIR: str = "uploads"
+    UPLOAD_DIR: str = "/tmp/uploads" if os.environ.get("VERCEL") else "uploads"
     MAX_UPLOAD_SIZE_MB: int = 10
 
     # ---- AI Models (legacy local model paths) ----
