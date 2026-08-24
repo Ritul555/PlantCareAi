@@ -23,7 +23,7 @@ class ApiService {
   /// Backend base URL. Change this if running backend on a different host/port.
   static const String _baseUrl = String.fromEnvironment(
     'API_URL', 
-    defaultValue: 'https://plantcareai-06fa.onrender.com',
+    defaultValue: 'https://plant-care-ai-kappa.vercel.app',
   );
   static const String _tokenKey = 'plantcare_jwt_token';
 
