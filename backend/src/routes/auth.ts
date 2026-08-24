@@ -5,7 +5,7 @@ import { User } from '../db';
 
 const router = Router();
 const SECRET_KEY = process.env.SECRET_KEY || 'your-super-secret-key-change-this-in-production';
-const TOKEN_EXPIRE = process.env.ACCESS_TOKEN_EXPIRE_MINUTES || 1440;
+const tokenExpireSeconds = parseInt(process.env.ACCESS_TOKEN_EXPIRE_MINUTES || '1440') * 60;
 
 router.post('/register', async (req: Request, res: Response) => {
   try {
@@ -23,7 +23,7 @@ router.post('/register', async (req: Request, res: Response) => {
       hashedPassword,
     });
 
-    const token = jwt.sign({ sub: (user as any).email, id: (user as any).id }, SECRET_KEY, { expiresIn: `${TOKEN_EXPIRE}m` });
+    const token = jwt.sign({ sub: (user as any).email, id: (user as any).id }, SECRET_KEY, { expiresIn: tokenExpireSeconds });
     
     res.status(201).json({
       access_token: token,
@@ -53,7 +53,7 @@ router.post('/login', async (req: Request, res: Response) => {
       return res.status(401).json({ detail: 'Incorrect email or password' });
     }
 
-    const token = jwt.sign({ sub: (user as any).email, id: (user as any).id }, SECRET_KEY, { expiresIn: `${TOKEN_EXPIRE}m` });
+    const token = jwt.sign({ sub: (user as any).email, id: (user as any).id }, SECRET_KEY, { expiresIn: tokenExpireSeconds });
     
     res.json({
       access_token: token,
