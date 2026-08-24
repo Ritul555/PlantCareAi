@@ -19,6 +19,7 @@ try {
 
 const fs = require('fs');
 const path = require('path');
+const { renderDashboardHtml } = require('./dashboardHtml.js');
 
 const SECRET_KEY = process.env.SECRET_KEY || 'plantcare-ai-super-secret-production-key-2026';
 const tokenExpireSeconds = parseInt(process.env.ACCESS_TOKEN_EXPIRE_MINUTES || '1440', 10) * 60;
@@ -453,8 +454,13 @@ if (!initError && express) {
     });
   };
 
-  // Health
+  // Health / Web Dashboard UI
   app.get('/', (req, res) => {
+    const acceptHeader = req.headers.accept || '';
+    if (acceptHeader.includes('text/html') || !acceptHeader.includes('application/json')) {
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      return res.send(renderDashboardHtml());
+    }
     res.json({
       status: 'healthy',
       app: 'PlantCare AI',
@@ -462,6 +468,11 @@ if (!initError && express) {
       version: '1.0.0',
       timestamp: new Date().toISOString(),
     });
+  });
+
+  app.get('/dashboard', (req, res) => {
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    return res.send(renderDashboardHtml());
   });
 
   app.get('/health', (req, res) => {
