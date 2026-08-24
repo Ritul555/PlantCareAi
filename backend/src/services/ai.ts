@@ -1,4 +1,4 @@
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const PLANT_ANALYSIS_PROMPT = `
 You are an expert botanist, plant pathologist, and horticulturist.
@@ -62,19 +62,20 @@ export async function analyzePlantImage(imageBuffer: Buffer, mimeType: string) {
     throw new Error('Gemini API key is not configured.');
   }
 
-  const ai = new GoogleGenAI({ apiKey });
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
-  const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash',
-    contents: [
-      { role: 'user', parts: [
-        { text: PLANT_ANALYSIS_PROMPT },
-        { inlineData: { data: imageBuffer.toString('base64'), mimeType } }
-      ]}
-    ]
-  });
+  const response = await model.generateContent([
+    PLANT_ANALYSIS_PROMPT,
+    {
+      inlineData: {
+        data: imageBuffer.toString('base64'),
+        mimeType: mimeType
+      }
+    }
+  ]);
 
-  const rawText = response.text || '';
+  const rawText = response.response.text() || '';
   const jsonMatch = rawText.match(/\{[\s\S]*\}/);
   if (!jsonMatch) {
     throw new Error('AI response was not in expected JSON format.');
