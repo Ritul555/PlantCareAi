@@ -5,13 +5,13 @@ const path = require('path');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 // ==========================================
 // 1. CONFIGURATION
 // ==========================================
 const SECRET_KEY = process.env.SECRET_KEY || 'plantcare-ai-super-secret-production-key-2026';
 const tokenExpireSeconds = parseInt(process.env.ACCESS_TOKEN_EXPIRE_MINUTES || '1440', 10) * 60;
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
 
 // ==========================================
 // 2. RESILIENT DATA STORE (/tmp + In-Memory)
@@ -180,7 +180,7 @@ class Database {
 const db = new Database();
 
 // ==========================================
-// 3. AI VISION SERVICE
+// 3. AI VISION SERVICE (NATIVE HTTPS FETCH)
 // ==========================================
 const PLANT_ANALYSIS_PROMPT = `
 You are an expert botanist, plant pathologist, and horticulturist.
@@ -239,27 +239,47 @@ Respond ONLY with a valid JSON object — no markdown formatting, no backticks, 
 `;
 
 async function analyzePlantImage(imageBuffer, mimeType) {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY || GEMINI_API_KEY;
   if (!apiKey) {
     return getFallbackAnalysis('Gemini API key not configured');
   }
 
   try {
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const base64Data = imageBuffer.toString('base64');
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    
+    const requestBody = {
+      contents: [
+        {
+          parts: [
+            { text: PLANT_ANALYSIS_PROMPT },
+            {
+              inline_data: {
+                mime_type: mimeType || 'image/jpeg',
+                data: base64Data
+              }
+            }
+          ]
+        }
+      ]
+    };
 
-    const result = await model.generateContent([
-      PLANT_ANALYSIS_PROMPT,
-      {
-        inlineData: {
-          data: imageBuffer.toString('base64'),
-          mimeType: mimeType || 'image/jpeg',
-        },
-      },
-    ]);
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody),
+    });
 
-    const response = await result.response;
-    const text = response.text() || '';
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(`Gemini API returned ${response.status}: ${errText.substring(0, 100)}`);
+    }
+
+    const data = await response.json();
+    const candidate = data.candidates && data.candidates[0];
+    const part = candidate && candidate.content && candidate.content.parts && candidate.content.parts[0];
+    const text = part && part.text ? part.text : '';
+
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       throw new Error('AI response did not contain valid JSON');
@@ -755,4 +775,16 @@ app.use((err, req, res, next) => {
   });
 });
 
-module.exports = app;
+// Export handler wrapped in safe try/catch for Vercel
+module.exports = (req, res) => {
+  try {
+    return app(req, res);
+  } catch (err) {
+    res.statusCode = 500;
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({
+      detail: err.message || 'Serverless invocation error',
+      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    }));
+  }
+};
