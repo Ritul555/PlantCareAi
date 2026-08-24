@@ -1,7 +1,10 @@
 import app from '../src/app';
-import { connectDB } from '../src/db';
 
-// Connect to DB for serverless environments
-connectDB();
+// Vercel Serverless Function Handler
+export default function handler(req: any, res: any) {
+  return app(req, res);
+}
 
-export default app;
+// CommonJS compatibility
+module.exports = app;
+module.exports.default = handler;
