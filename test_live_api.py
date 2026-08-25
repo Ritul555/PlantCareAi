@@ -13,10 +13,9 @@ def test_health():
     req = urllib.request.Request(f"{BASE_URL}/")
     with urllib.request.urlopen(req, context=ctx) as response:
         status = response.getcode()
-        body = response.read().decode()
-        print(f"Status: {status}")
-        print(f"Body: {body}")
-        assert status == 200
+    body = response.read().decode('utf-8', errors='ignore')
+    print(f"Status: {status} (Length: {len(body)})")
+    assert status == 200
 
 def test_register():
     print("\n--- 2. Testing POST /auth/register ---")
