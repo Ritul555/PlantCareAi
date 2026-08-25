@@ -4,21 +4,33 @@ function renderDashboardHtml() {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PlantCare AI — Botanical Vision Intelligence</title>
+  <title>PlantCare AI — Scan. Detect. Protect.</title>
   
-  <!-- Google Fonts: Figtree -->
+  <!-- Modern Aesthetic Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <style>
     :root {
       --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
       --accent-pink: #F598F2;
-      --accent-pink-glow: rgba(245, 152, 242, 0.45);
+      --accent-pink-glow: rgba(245, 152, 242, 0.35);
+      --primary-green: #10b981;
+      --primary-light: #34d399;
+      --primary-glow: rgba(16, 185, 129, 0.25);
+      --bg-dark: #080d0a;
+      --bg-surface: #0e1612;
+      --card-bg: rgba(14, 22, 18, 0.72);
+      --card-border: rgba(255, 255, 255, 0.1);
+      --card-border-hover: rgba(52, 211, 153, 0.35);
       --text-white: #ffffff;
-      --border-light: rgba(255, 255, 255, 0.15);
-      --card-bg: rgba(10, 10, 10, 0.75);
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 22px;
+      --radius-full: 9999px;
     }
 
     * {
@@ -30,12 +42,16 @@ function renderDashboardHtml() {
     }
 
     body {
-      font-family: 'Figtree', sans-serif;
-      background-color: #000000;
+      font-family: 'Plus Jakarta Sans', 'Figtree', sans-serif;
+      background-color: var(--bg-dark);
       color: var(--text-white);
       min-height: 100vh;
       overflow-x: hidden;
-      position: relative;
+      line-height: 1.6;
+    }
+
+    h1, h2, h3, h4, .brand-font {
+      font-family: 'Outfit', sans-serif;
     }
 
     /* Video Background Stack */
@@ -71,35 +87,70 @@ function renderDashboardHtml() {
     .video-overlay {
       position: absolute;
       inset: 0;
-      background: rgba(0, 0, 0, 0.25);
+      background: radial-gradient(circle at center, rgba(8, 13, 10, 0.4) 0%, rgba(8, 13, 10, 0.85) 90%);
       z-index: 1;
     }
 
-    /* Common Container */
+    /* Container */
     .hero-container {
       max-width: 1340px;
       margin: 0 auto;
-      padding-left: 15px;
-      padding-right: 15px;
+      padding-left: 20px;
+      padding-right: 20px;
       position: relative;
       z-index: 2;
     }
 
     /* Navbar */
     header {
-      position: absolute;
+      position: fixed;
       top: 0;
       left: 0;
       width: 100%;
-      z-index: 20;
+      z-index: 100;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      background: rgba(8, 13, 10, 0.75);
+      border-bottom: 1px solid var(--card-border);
+      transition: background 0.3s;
     }
 
     .navbar-inner {
-      padding-top: 36px;
-      padding-bottom: 36px;
+      height: 80px;
       display: flex;
       align-items: center;
       justify-content: space-between;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text-white);
+    }
+    .brand-icon-box {
+      width: 38px;
+      height: 38px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.25) 0%, rgba(5, 150, 105, 0.5) 100%);
+      border: 1px solid rgba(52, 211, 153, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 0 16px var(--primary-glow);
+    }
+    .brand-title-text {
+      font-family: 'Outfit', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    .brand-title-text span {
+      background: linear-gradient(135deg, #a7f3d0 0%, var(--primary-light) 50%, var(--accent-pink) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
     .nav-links-left {
@@ -115,24 +166,28 @@ function renderDashboardHtml() {
       text-decoration: none;
       color: var(--text-white);
       position: relative;
-      padding-bottom: 4px;
+      padding: 6px 0;
       cursor: pointer;
+      background: none;
+      border: none;
+      font-family: inherit;
     }
 
     .nav-index {
-      font-size: 8px;
+      font-size: 9px;
       line-height: 12px;
-      letter-spacing: -0.08px;
-      font-weight: 500;
+      letter-spacing: -0.05px;
+      font-weight: 600;
       text-transform: uppercase;
-      opacity: 0.6;
+      opacity: 0.5;
+      color: var(--primary-light);
     }
 
     .nav-label {
-      font-size: 12px;
+      font-size: 13px;
       line-height: 16px;
-      letter-spacing: -0.12px;
-      font-weight: 500;
+      letter-spacing: -0.1px;
+      font-weight: 600;
       text-transform: uppercase;
     }
 
@@ -141,57 +196,68 @@ function renderDashboardHtml() {
       bottom: 0;
       right: 0;
       width: 100%;
-      height: 1px;
-      background-color: var(--text-white);
+      height: 2px;
+      background: linear-gradient(90deg, var(--primary-light), var(--accent-pink));
       transform: scaleX(0);
       transform-origin: right;
-      transition: transform 0.4s var(--ease-spring);
+      transition: transform 0.35s var(--ease-spring);
     }
 
-    .nav-item:hover .nav-link-underline {
+    .nav-item:hover .nav-link-underline,
+    .nav-item.active .nav-link-underline {
       transform: scaleX(1);
       transform-origin: left;
+    }
+    .nav-item.active .nav-label {
+      color: var(--primary-light);
     }
 
     .nav-right {
       display: flex;
       align-items: center;
-      gap: 32px;
-      text-align: right;
+      gap: 20px;
     }
 
-    .nav-email {
+    .contact-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
       font-size: 12px;
-      line-height: 16px;
-      letter-spacing: -0.12px;
-      font-weight: 500;
-      text-decoration: none;
       color: var(--text-white);
-      opacity: 0.8;
-      transition: opacity 0.2s;
+      text-decoration: none;
+      transition: all 0.2s;
     }
-    .nav-email:hover { opacity: 1; }
+    .contact-badge:hover {
+      background: rgba(16, 185, 129, 0.12);
+      border-color: rgba(52, 211, 153, 0.4);
+      color: var(--primary-light);
+    }
 
     .nav-clock {
       font-size: 12px;
-      line-height: 16px;
-      letter-spacing: -0.12px;
-      font-weight: 500;
+      font-weight: 600;
       font-variant-numeric: tabular-nums;
-      opacity: 0.9;
+      color: var(--text-muted);
+      background: rgba(0, 0, 0, 0.3);
+      padding: 6px 12px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--card-border);
     }
 
-    /* Mobile Menu Toggle */
     .mobile-menu-btn {
       display: none;
       background: transparent;
-      border: 1px solid var(--border-light);
+      border: 1px solid var(--card-border);
       color: var(--text-white);
-      padding: 6px 14px;
-      border-radius: 9999px;
+      padding: 8px 16px;
+      border-radius: var(--radius-full);
       font-size: 12px;
       text-transform: uppercase;
-      font-weight: 500;
+      font-weight: 600;
       cursor: pointer;
       font-family: inherit;
     }
@@ -201,30 +267,29 @@ function renderDashboardHtml() {
       grid-template-rows: 0fr;
       transition: grid-template-rows 420ms var(--ease-spring);
       overflow: hidden;
-      background: rgba(0, 0, 0, 0.9);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border-light);
+      background: rgba(8, 13, 10, 0.95);
+      backdrop-filter: blur(25px);
+      border-bottom: 1px solid var(--card-border);
     }
     .mobile-nav-panel.open {
       grid-template-rows: 1fr;
     }
     .mobile-nav-content {
       min-height: 0;
-      padding: 0 18px;
+      padding: 0 20px;
     }
     .mobile-nav-panel.open .mobile-nav-content {
-      padding: 24px 18px 32px;
+      padding: 24px 20px 32px;
     }
     .mobile-nav-link {
       display: block;
-      font-size: 28px;
-      line-height: 32px;
-      letter-spacing: -0.84px;
-      font-weight: 500;
+      font-size: 24px;
+      font-weight: 600;
       text-transform: uppercase;
       color: var(--text-white);
       text-decoration: none;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
+      font-family: 'Outfit', sans-serif;
     }
 
     /* Hero Section */
@@ -233,18 +298,19 @@ function renderDashboardHtml() {
       display: flex;
       flex-direction: column;
       justify-content: flex-end;
-      padding-top: 190px;
-      padding-bottom: 60px;
+      padding-top: 160px;
+      padding-bottom: 70px;
+      position: relative;
+      z-index: 2;
     }
 
     .hero-flex-wrapper {
       display: flex;
       flex-direction: column;
-      gap: 150px;
+      gap: 120px;
       width: 100%;
     }
 
-    /* Upper Section: Video Switcher + Availability */
     .hero-upper {
       display: flex;
       align-items: flex-end;
@@ -253,9 +319,8 @@ function renderDashboardHtml() {
     }
 
     .switcher-col {
-      flex: 4;
       display: flex;
-      gap: 28px;
+      gap: 24px;
       flex-wrap: wrap;
     }
 
@@ -264,67 +329,49 @@ function renderDashboardHtml() {
       border: none;
       color: var(--text-white);
       cursor: pointer;
-      font-family: 'Figtree', sans-serif;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       font-size: 11px;
-      font-weight: 500;
+      font-weight: 600;
       letter-spacing: 0.05em;
       text-transform: uppercase;
-      opacity: 0.55;
+      opacity: 0.5;
       transition: all 0.3s var(--ease-spring);
-      display: inline-block;
     }
     .role-link:hover {
-      opacity: 0.75;
+      opacity: 0.8;
       transform: translateX(4px);
     }
     .role-link.active {
       opacity: 1;
-      font-weight: 600;
+      color: var(--primary-light);
       transform: translateX(0);
     }
 
     .availability-col {
-      flex: 1;
       display: flex;
       align-items: center;
-      justify-content: flex-end;
       gap: 10px;
     }
 
     .status-dot {
-      width: 7px;
-      height: 7px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
       background-color: var(--accent-pink);
-      box-shadow: 0 0 10px var(--accent-pink-glow);
+      box-shadow: 0 0 12px var(--accent-pink-glow);
       animation: dotPulse 1.6s infinite ease-in-out;
       transition: background-color 0.5s, box-shadow 0.5s;
     }
     .status-dot.white-dot {
       background-color: #ffffff;
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+      box-shadow: 0 0 12px rgba(255, 255, 255, 0.7);
     }
 
     @keyframes dotPulse {
-      0%, 100% {
-        opacity: 1;
-        transform: scale(1);
-      }
-      50% {
-        opacity: 0.45;
-        transform: scale(1.45);
-      }
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.45; transform: scale(1.45); }
     }
 
-    .status-text {
-      font-size: 13px;
-      line-height: 16px;
-      font-weight: 500;
-      letter-spacing: -0.13px;
-      white-space: nowrap;
-    }
-
-    /* Lower Section: Name + CTA */
     .hero-lower {
       display: flex;
       align-items: flex-end;
@@ -336,23 +383,30 @@ function renderDashboardHtml() {
       flex: 2;
     }
 
+    /* Aesthetic Gradient Typography for PlantCareAi */
     .hero-title {
-      font-size: clamp(72px, 10.5vw, 150px);
-      line-height: 85%;
+      font-family: 'Outfit', sans-serif;
+      font-size: clamp(64px, 10vw, 140px);
+      line-height: 88%;
       letter-spacing: -0.04em;
-      font-weight: 500;
+      font-weight: 800;
       text-transform: uppercase;
       margin: 0;
       white-space: nowrap;
+      background: linear-gradient(135deg, #ffffff 0%, #d1fae5 50%, #6ee7b7 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
       animation: revealUp 0.9s var(--ease-spring) forwards;
     }
 
     .hero-title .title-dot {
       color: var(--accent-pink);
+      -webkit-text-fill-color: var(--accent-pink);
       transition: color 0.5s;
     }
     .hero-title .title-dot.white-dot {
       color: #ffffff;
+      -webkit-text-fill-color: #ffffff;
     }
 
     .cta-col {
@@ -361,7 +415,7 @@ function renderDashboardHtml() {
       display: flex;
       flex-direction: column;
       align-items: flex-start;
-      gap: 24px;
+      gap: 20px;
     }
 
     .hero-desc {
@@ -369,30 +423,27 @@ function renderDashboardHtml() {
       line-height: 24px;
       letter-spacing: -0.16px;
       font-weight: 500;
-      color: rgba(255, 255, 255, 0.9);
+      color: rgba(255, 255, 255, 0.85);
       max-width: 380px;
       animation: revealRight 0.9s var(--ease-spring) forwards;
     }
 
-    /* Start Project / Launch AI Button with Fill-Up Animation */
     .btn-project {
       position: relative;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: 14px 28px;
-      border: 1px solid #ffffff;
-      border-radius: 9999px;
+      padding: 13px 28px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: var(--radius-full);
       background: transparent;
       color: #ffffff;
-      font-family: 'Figtree', sans-serif;
       font-size: 14px;
-      font-weight: 500;
-      text-transform: lowercase;
+      font-weight: 600;
       text-decoration: none;
       cursor: pointer;
       overflow: hidden;
-      transition: color 0.4s var(--ease-spring), border-color 0.4s var(--ease-spring);
+      transition: all 0.4s var(--ease-spring);
       animation: revealRight 0.9s var(--ease-spring) 0.08s forwards;
       opacity: 0;
       animation-fill-mode: forwards;
@@ -415,247 +466,342 @@ function renderDashboardHtml() {
     .btn-project:hover {
       color: #000000;
       border-color: var(--accent-pink);
+      box-shadow: 0 0 20px var(--accent-pink-glow);
     }
-
     .btn-project:hover::before {
       transform: translateY(0);
     }
 
-    /* Animations */
     @keyframes revealUp {
-      from {
-        opacity: 0;
-        transform: translateY(80px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(60px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-
     @keyframes revealRight {
-      from {
-        opacity: 0;
-        transform: translateX(100px);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
+      from { opacity: 0; transform: translateX(80px); }
+      to { opacity: 1; transform: translateX(0); }
     }
 
-    /* Interactive PlantCare AI Scanner Modal & Workspace */
-    .interactive-panel {
+    /* Content Views (Works, Services, About, Contact) */
+    .page-section {
+      padding: 100px 0 120px;
       position: relative;
       z-index: 10;
-      background: rgba(8, 8, 8, 0.92);
+      background: rgba(8, 13, 10, 0.92);
       backdrop-filter: blur(30px);
       -webkit-backdrop-filter: blur(30px);
-      border-top: 1px solid var(--border-light);
-      padding: 80px 0 100px;
+      border-top: 1px solid var(--card-border);
     }
 
-    .panel-header {
-      text-align: center;
-      margin-bottom: 50px;
-    }
-    .panel-title {
-      font-size: 40px;
-      font-weight: 600;
-      letter-spacing: -1.5px;
-      margin-bottom: 12px;
-    }
-    .panel-sub {
-      font-size: 15px;
-      color: rgba(255, 255, 255, 0.65);
-      max-width: 500px;
-      margin: 0 auto;
+    .section-eyebrow {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--primary-light);
+      font-weight: 700;
+      margin-bottom: 10px;
     }
 
-    .workspace-grid {
+    .section-heading {
+      font-family: 'Outfit', sans-serif;
+      font-size: 42px;
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -1px;
+      margin-bottom: 16px;
+    }
+
+    .section-heading span {
+      background: linear-gradient(135deg, #a7f3d0 0%, var(--primary-light) 50%, var(--accent-pink) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .section-sub {
+      font-size: 16px;
+      color: var(--text-muted);
+      max-width: 620px;
+      margin-bottom: 48px;
+    }
+
+    /* Box / Card Grids */
+    .box-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 24px;
+    }
+
+    .feature-box {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      transition: all 0.3s var(--ease-spring);
+      position: relative;
+      overflow: hidden;
+    }
+    .feature-box:hover {
+      border-color: var(--card-border-hover);
+      transform: translateY(-4px);
+      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.4);
+    }
+
+    .feature-box-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-md);
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(52, 211, 153, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      margin-bottom: 20px;
+      color: var(--primary-light);
+    }
+
+    .feature-box h3 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .feature-box p {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .feature-tag {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--primary-light);
+      margin-top: 16px;
+    }
+
+    /* Scanner Interactive Layout in Works */
+    .scanner-workspace-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 30px;
+      gap: 28px;
+      margin-top: 40px;
     }
 
-    .card-box {
-      background: rgba(18, 18, 18, 0.6);
-      border: 1px solid var(--border-light);
-      border-radius: 20px;
-      padding: 32px;
-    }
-
-    .upload-zone {
-      border: 1px dashed rgba(255, 255, 255, 0.25);
-      border-radius: 14px;
-      padding: 40px 20px;
+    .dropzone-aesthetic {
+      border: 2px dashed rgba(52, 211, 153, 0.3);
+      border-radius: var(--radius-lg);
+      padding: 40px 24px;
       text-align: center;
       cursor: pointer;
-      transition: border-color 0.3s;
+      transition: all 0.3s;
       background: rgba(0, 0, 0, 0.3);
+      position: relative;
+      overflow: hidden;
     }
-    .upload-zone:hover {
-      border-color: var(--accent-pink);
-    }
-    .upload-icon {
-      font-size: 32px;
-      margin-bottom: 12px;
-      opacity: 0.8;
+    .dropzone-aesthetic:hover {
+      border-color: var(--primary-light);
+      background: rgba(16, 185, 129, 0.05);
     }
 
-    .preview-wrap {
+    .preview-box-aesthetic {
       display: none;
       margin-top: 16px;
-      border-radius: 12px;
+      border-radius: var(--radius-md);
       overflow: hidden;
       max-height: 260px;
       position: relative;
+      border: 1px solid var(--card-border);
     }
-    .preview-wrap img {
+    .preview-box-aesthetic img {
       width: 100%;
       height: 260px;
       object-fit: cover;
     }
 
-    .scan-line {
+    .scan-beam-laser {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
-      height: 2px;
-      background: var(--accent-pink);
-      box-shadow: 0 0 12px var(--accent-pink);
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--primary-light), var(--accent-pink), transparent);
+      box-shadow: 0 0 15px var(--accent-pink);
       display: none;
-      animation: scanLaser 2s infinite ease-in-out;
+      animation: laserAnim 2s infinite ease-in-out;
     }
-    @keyframes scanLaser {
+    @keyframes laserAnim {
       0% { top: 0; }
       50% { top: 98%; }
       100% { top: 0; }
     }
 
-    .btn-action {
+    .btn-emerald {
       width: 100%;
       margin-top: 20px;
       padding: 14px;
-      border-radius: 9999px;
-      background: #ffffff;
-      color: #000000;
-      font-family: inherit;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, var(--primary-green) 0%, #059669 100%);
+      color: #041a10;
       font-size: 14px;
-      font-weight: 600;
+      font-weight: 700;
       border: none;
       cursor: pointer;
-      transition: all 0.3s;
+      transition: all 0.2s;
     }
-    .btn-action:hover:not(:disabled) {
-      background: var(--accent-pink);
-      box-shadow: 0 0 20px var(--accent-pink-glow);
+    .btn-emerald:hover:not(:disabled) {
+      box-shadow: 0 0 20px var(--primary-glow);
+      transform: translateY(-2px);
     }
-    .btn-action:disabled {
-      opacity: 0.4;
+    .btn-emerald:disabled {
+      opacity: 0.5;
       cursor: not-allowed;
     }
 
-    .result-badge {
-      display: inline-block;
-      padding: 4px 12px;
-      border-radius: 9999px;
-      font-size: 11px;
+    /* About Cards */
+    .about-lead-box {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(245, 152, 242, 0.05) 100%);
+      border: 1px solid var(--card-border-hover);
+      border-radius: var(--radius-lg);
+      padding: 36px;
+      margin-bottom: 36px;
+    }
+    .about-lead-box p {
+      font-size: 17px;
+      line-height: 1.7;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .offerings-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+    }
+    .offering-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .offering-item-icon {
+      color: var(--primary-light);
+      font-size: 18px;
+    }
+
+    /* Contact Details Cards */
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+    }
+
+    .contact-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg);
+      padding: 36px;
+    }
+
+    .contact-info-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .contact-info-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(52, 211, 153, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: var(--primary-light);
+    }
+    .contact-info-label {
+      font-size: 12px;
       text-transform: uppercase;
+      color: var(--text-dim);
       font-weight: 700;
-      background: rgba(245, 152, 242, 0.15);
-      color: var(--accent-pink);
-      border: 1px solid rgba(245, 152, 242, 0.4);
-      margin-bottom: 16px;
+      letter-spacing: 0.5px;
+    }
+    .contact-info-val {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-white);
+    }
+    .contact-info-val a {
+      color: var(--primary-light);
+      text-decoration: none;
     }
 
-    /* Responsive Breakpoints */
-    /* Tablet: 810px - 1199.98px */
-    @media (min-width: 810px) and (max-width: 1199.98px) {
-      .navbar-inner {
-        padding-top: 30px;
-        padding-bottom: 30px;
-        padding-left: 18px;
-        padding-right: 18px;
-      }
-      .nav-links-left {
-        gap: 16px;
-      }
-      .hero-title {
-        font-size: 129.6px;
-        line-height: 113.4px;
-        letter-spacing: -7.7px;
-      }
-      .hero-lower {
-        gap: 28px;
-        padding-bottom: 52px;
-      }
-      .cta-col {
-        padding-left: 24px;
-      }
+    .contact-reasons-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    .reason-pill {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.85);
     }
 
-    /* Mobile: < 809.98px */
-    @media (max-width: 809.98px) {
-      .navbar-inner {
-        padding-top: 24px;
-        padding-bottom: 24px;
-        padding-left: 18px;
-        padding-right: 18px;
-      }
-      .nav-links-left, .nav-right {
-        display: none;
-      }
-      .mobile-menu-btn {
-        display: block;
-      }
-      .hero-section {
-        justify-content: flex-end;
-        align-items: flex-start;
-        gap: 72px;
-        padding-top: 140px;
-        padding-left: 18px;
-        padding-right: 18px;
-      }
-      .hero-flex-wrapper {
-        gap: 72px;
-      }
-      .hero-upper {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 28px;
-      }
-      .availability-col {
-        justify-content: flex-start;
-      }
-      .hero-lower {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 32px;
-        padding-bottom: 44px;
-      }
-      .hero-title {
-        font-size: clamp(68px, 21vw, 80px);
-        line-height: 96px;
-        letter-spacing: -4.8px;
-      }
-      .cta-col {
-        padding-left: 0;
-      }
-      .hero-desc {
-        max-width: 420px;
-      }
-      .workspace-grid {
-        grid-template-columns: 1fr;
-      }
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--card-border);
+      padding: 40px 0;
+      background: #050806;
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-dim);
+      position: relative;
+      z-index: 10;
     }
 
-    @media (prefers-reduced-motion: reduce) {
-      * {
-        animation: none !important;
-        transition: none !important;
-      }
+    /* Toast */
+    .toast-popup {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #10b981;
+      color: #04140b;
+      font-weight: 700;
+      padding: 12px 24px;
+      border-radius: var(--radius-full);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      z-index: 1000;
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .navbar-inner { height: 70px; }
+      .nav-links-left, .nav-right { display: none; }
+      .mobile-menu-btn { display: block; }
+      .hero-flex-wrapper { gap: 60px; }
+      .hero-upper { flex-direction: column; align-items: flex-start; gap: 20px; }
+      .hero-lower { flex-direction: column; align-items: flex-start; gap: 28px; }
+      .cta-col { padding-left: 0; }
+      .scanner-workspace-grid, .contact-grid { grid-template-columns: 1fr; }
+      .contact-reasons-list { grid-template-columns: 1fr; }
+      .section-heading { font-size: 32px; }
     }
   </style>
 </head>
@@ -679,41 +825,59 @@ function renderDashboardHtml() {
   <header>
     <div class="hero-container">
       <div class="navbar-inner">
-        <!-- Left: Index Links -->
+        <!-- Logo -->
+        <a href="#home" class="brand-logo" onclick="navigateTo('home')">
+          <div class="brand-icon-box">🌿</div>
+          <div class="brand-title-text">PlantCare<span>Ai</span></div>
+        </a>
+
+        <!-- Left Links: 01/Works, 02/Services, 03/About, 04/Contact -->
         <nav class="nav-links-left" aria-label="Main Navigation">
-          <a class="nav-item" href="#scanner" onclick="scrollToScanner()">
+          <button class="nav-item active" id="nav-btn-home" onclick="navigateTo('home')">
+            <span class="nav-index">00</span>
+            <span class="nav-index">/</span>
+            <span class="nav-label">Home</span>
+            <span class="nav-link-underline"></span>
+          </button>
+          <button class="nav-item" id="nav-btn-works" onclick="navigateTo('works')">
             <span class="nav-index">01</span>
             <span class="nav-index">/</span>
             <span class="nav-label">Works</span>
             <span class="nav-link-underline"></span>
-          </a>
-          <a class="nav-item" href="#scanner" onclick="scrollToScanner()">
+          </button>
+          <button class="nav-item" id="nav-btn-services" onclick="navigateTo('services')">
             <span class="nav-index">02</span>
             <span class="nav-index">/</span>
             <span class="nav-label">Services</span>
             <span class="nav-link-underline"></span>
-          </a>
-          <a class="nav-item" href="#scanner" onclick="scrollToScanner()">
+          </button>
+          <button class="nav-item" id="nav-btn-about" onclick="navigateTo('about')">
             <span class="nav-index">03</span>
             <span class="nav-index">/</span>
             <span class="nav-label">About</span>
             <span class="nav-link-underline"></span>
-          </a>
-          <a class="nav-item" href="#scanner" onclick="scrollToScanner()">
+          </button>
+          <button class="nav-item" id="nav-btn-contact" onclick="navigateTo('contact')">
             <span class="nav-index">04</span>
             <span class="nav-index">/</span>
             <span class="nav-label">Contact</span>
             <span class="nav-link-underline"></span>
-          </a>
+          </button>
         </nav>
 
-        <!-- Right: Email + Realtime Clock -->
+        <!-- Right Side: Contact Details + Clock -->
         <div class="nav-right">
-          <a href="mailto:Davies@gmail.com" class="nav-email">Davies@gmail.com</a>
+          <a href="mailto:ritul.gautam24@gmail.com" class="contact-badge" title="Click to email ritul.gautam24@gmail.com">
+            <span>📧</span>
+            <span>ritul.gautam24@gmail.com</span>
+          </a>
+          <div class="contact-badge">
+            <span>📍 India</span>
+          </div>
           <div class="nav-clock" id="liveClock" aria-label="Current Time">CUP --:--:--</div>
         </div>
 
-        <!-- Mobile Toggle Button -->
+        <!-- Mobile Menu Toggle Button -->
         <button class="mobile-menu-btn" id="mobileMenuBtn" aria-expanded="false" onclick="toggleMobileNav()">Menu</button>
       </div>
     </div>
@@ -721,23 +885,25 @@ function renderDashboardHtml() {
     <!-- Mobile Collapsible Nav -->
     <div class="mobile-nav-panel" id="mobileNavPanel">
       <div class="mobile-nav-content">
-        <a href="#scanner" class="mobile-nav-link" onclick="toggleMobileNav(); scrollToScanner();">01 / Works</a>
-        <a href="#scanner" class="mobile-nav-link" onclick="toggleMobileNav(); scrollToScanner();">02 / Services</a>
-        <a href="#scanner" class="mobile-nav-link" onclick="toggleMobileNav(); scrollToScanner();">03 / About</a>
-        <a href="#scanner" class="mobile-nav-link" onclick="toggleMobileNav(); scrollToScanner();">04 / Contact</a>
-        <div style="margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--border-light);">
-          <div style="font-size: 13px; opacity: 0.7; margin-bottom: 6px;">Davies@gmail.com</div>
-          <div style="font-size: 13px; opacity: 0.9;" id="mobileClock">CUP --:--:--</div>
+        <a href="#home" class="mobile-nav-link" onclick="toggleMobileNav(); navigateTo('home');">00 / Home</a>
+        <a href="#works" class="mobile-nav-link" onclick="toggleMobileNav(); navigateTo('works');">01 / Works</a>
+        <a href="#services" class="mobile-nav-link" onclick="toggleMobileNav(); navigateTo('services');">02 / Services</a>
+        <a href="#about" class="mobile-nav-link" onclick="toggleMobileNav(); navigateTo('about');">03 / About</a>
+        <a href="#contact" class="mobile-nav-link" onclick="toggleMobileNav(); navigateTo('contact');">04 / Contact</a>
+        <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--card-border);">
+          <div style="font-size: 13px; color: var(--primary-light); margin-bottom: 6px;">📧 ritul.gautam24@gmail.com</div>
+          <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 6px;">📍 India</div>
+          <div style="font-size: 12px; color: var(--text-dim);" id="mobileClock">CUP --:--:--</div>
         </div>
       </div>
     </div>
   </header>
 
-  <!-- Hero Content -->
-  <main class="hero-section">
+  <!-- 00 / Hero Section -->
+  <main class="hero-section" id="section-home">
     <div class="hero-container hero-flex-wrapper">
       
-      <!-- Section 1: Video Switcher + Availability -->
+      <!-- Video Switcher + Availability -->
       <section class="hero-upper" aria-label="Experience Switcher">
         <div class="switcher-col">
           <button class="role-link active" onclick="switchVideo(0)" id="switch-0">01 / WATER WAVE</button>
@@ -747,11 +913,11 @@ function renderDashboardHtml() {
 
         <div class="availability-col" aria-label="Status">
           <div class="status-dot" id="statusDot"></div>
-          <span class="status-text">Available for work</span>
+          <span style="font-size: 13px; font-weight: 600; letter-spacing: -0.1px;">AI Diagnostics Online</span>
         </div>
       </section>
 
-      <!-- Section 2: Name + CTA -->
+      <!-- PlantCareAi Name + CTA -->
       <section class="hero-lower" aria-label="Introduction">
         <div class="name-col">
           <h1 class="hero-title">
@@ -763,8 +929,8 @@ function renderDashboardHtml() {
           <p class="hero-desc">
             Intelligent Plant Disease Detection & Care Recommendations
           </p>
-          <a href="#scanner" class="btn-project" onclick="scrollToScanner()">
-            start a project
+          <a href="#works" class="btn-project" onclick="navigateTo('works')">
+            explore works & scanner
           </a>
         </div>
       </section>
@@ -772,85 +938,315 @@ function renderDashboardHtml() {
     </div>
   </main>
 
-  <!-- Interactive AI Diagnostics Workspace -->
-  <section class="interactive-panel" id="scanner">
+  <!-- 01 / Works Page Section (Box Format) -->
+  <section class="page-section" id="section-works">
     <div class="hero-container">
-      <div class="panel-header">
-        <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-pink); font-weight: 600; margin-bottom: 8px;">AI Computer Vision Lab</div>
-        <h2 class="panel-title">Precision Botanical Diagnostics</h2>
-        <p class="panel-sub">Upload specimen leaves or select sample presets to evaluate pathogen probability, health index, and treatment roadmap.</p>
+      <div class="section-eyebrow">01 / Works Showcase</div>
+      <h2 class="section-heading">Platform Capabilities & <span>Live AI Scanner</span></h2>
+      <p class="section-sub">Experience precision computer vision and automated diagnostics built into a responsive, intuitive interface.</p>
+
+      <!-- Works in Box Format -->
+      <div class="box-grid">
+        <div class="feature-box">
+          <div class="feature-box-icon">🔬</div>
+          <h3>Gemini Vision AI Engine</h3>
+          <p>Processes high-resolution leaf imagery through multi-layer convolutional networks to extract pathological signatures in under 2 seconds.</p>
+          <span class="feature-tag">Realtime Inference</span>
+        </div>
+
+        <div class="feature-box">
+          <div class="feature-box-icon">📊</div>
+          <h3>548 Health Condition Models</h3>
+          <p>Distinguishes nutrient deficiencies, fungal blight, bacterial wilt, spider mites, and physiological irrigation stress with acute precision.</p>
+          <span class="feature-tag">Pathology Database</span>
+        </div>
+
+        <div class="feature-box">
+          <div class="feature-box-icon">🪴</div>
+          <h3>Garden Collection & IoT Telemetry</h3>
+          <p>Organize monitored houseplants, track scheduled hydration cycles, and synchronize ambient environmental sensor telemetry.</p>
+          <span class="feature-tag">Sensor Sync</span>
+        </div>
       </div>
 
-      <div class="workspace-grid">
-        <!-- Input Box -->
-        <div class="card-box">
-          <h3 style="font-size: 18px; margin-bottom: 16px; font-weight: 500;">Specimen Image</h3>
-          <div class="upload-zone" onclick="document.getElementById('plantFileInput').click()">
-            <div class="upload-icon">📷</div>
-            <div style="font-size: 15px; font-weight: 600; margin-bottom: 4px;">Drag & Drop or Click to Select</div>
-            <div style="font-size: 13px; color: rgba(255,255,255,0.5);">PNG, JPG, WebP formats up to 10MB</div>
-            <input type="file" id="plantFileInput" style="display: none;" accept="image/*">
-            <div class="preview-wrap" id="previewWrap">
-              <img id="previewImage" alt="Specimen Preview">
-              <div class="scan-line" id="scanLine"></div>
+      <!-- Live Interactive AI Scanner Workstation -->
+      <div class="scanner-workspace-grid">
+        <div class="feature-box">
+          <h3 style="margin-bottom: 6px;">Live Specimen Diagnosis</h3>
+          <p style="font-size: 13px; margin-bottom: 16px;">Select or drop a plant leaf image to run automated diagnostics.</p>
+
+          <div class="dropzone-aesthetic" id="dropzone" onclick="document.getElementById('fileInput').click()">
+            <div style="font-size: 36px; margin-bottom: 10px;">📷</div>
+            <div style="font-weight: 600; font-size: 15px; margin-bottom: 4px;">Click or Drag Leaf Image</div>
+            <div style="font-size: 12px; color: var(--text-dim);">PNG, JPG, WebP up to 10MB</div>
+            <input type="file" id="fileInput" style="display: none;" accept="image/*">
+            <div class="preview-box-aesthetic" id="previewBox">
+              <img id="previewImage" alt="Preview">
+              <div class="scan-beam-laser" id="scanBeam"></div>
             </div>
           </div>
 
-          <div style="margin-top: 18px; display: flex; gap: 8px; flex-wrap: wrap;">
-            <button class="role-link active" style="padding: 6px 12px; background: rgba(255,255,255,0.06); border-radius: 9999px;" onclick="loadSampleSpecimen('Monstera Deliciosa', 'healthy')">Healthy Monstera</button>
-            <button class="role-link" style="padding: 6px 12px; background: rgba(255,255,255,0.06); border-radius: 9999px;" onclick="loadSampleSpecimen('Tomato Early Blight', 'blight')">Tomato Blight</button>
-            <button class="role-link" style="padding: 6px 12px; background: rgba(255,255,255,0.06); border-radius: 9999px;" onclick="loadSampleSpecimen('Sansevieria Trifasciata', 'dry')">Snake Plant</button>
+          <div style="margin-top: 16px; display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="role-link active" style="padding: 6px 12px; background: rgba(255,255,255,0.06); border-radius: 9999px;" onclick="loadSample('Monstera Deliciosa', 'healthy')">Sample: Monstera</button>
+            <button class="role-link" style="padding: 6px 12px; background: rgba(255,255,255,0.06); border-radius: 9999px;" onclick="loadSample('Tomato Early Blight', 'blight')">Sample: Blight</button>
+            <button class="role-link" style="padding: 6px 12px; background: rgba(255,255,255,0.06); border-radius: 9999px;" onclick="loadSample('Sansevieria', 'dry')">Sample: Snake Plant</button>
           </div>
 
-          <button class="btn-action" id="diagnoseBtn" onclick="runDiagnostics()" disabled>
+          <button class="btn-emerald" id="scanBtn" onclick="executeDiagnosis()" disabled>
             Execute AI Health Diagnosis
           </button>
         </div>
 
-        <!-- Output Box -->
-        <div class="card-box" id="resultsBox">
-          <div id="emptyResults" style="text-align: center; padding: 60px 20px; color: rgba(255,255,255,0.4);">
-            <div style="font-size: 36px; margin-bottom: 12px;">🌱</div>
-            <h4 style="font-size: 16px; color: #fff; margin-bottom: 6px;">Awaiting Image Input</h4>
-            <p style="font-size: 13px;">Upload an image on the left and trigger diagnosis to inspect pathological signatures.</p>
+        <div class="feature-box" id="resultContainer">
+          <div id="resultEmpty" style="text-align: center; padding: 60px 20px; color: var(--text-dim);">
+            <div style="font-size: 42px; margin-bottom: 12px; opacity: 0.4;">🌱</div>
+            <h4 style="font-size: 16px; color: #fff; margin-bottom: 6px;">Awaiting Plant Image</h4>
+            <p style="font-size: 13px;">Upload an image or choose a preset to view comprehensive health classification.</p>
           </div>
 
-          <div id="fullResults" style="display: none;">
+          <div id="resultCard" style="display: none;">
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px;">
               <div>
-                <h3 id="resPlantName" style="font-size: 24px; font-weight: 600;">Monstera Deliciosa</h3>
-                <span id="resScientificName" style="font-size: 13px; color: rgba(255,255,255,0.5); font-style: italic;">Monstera deliciosa</span>
+                <h3 id="resPlantName" style="font-size: 24px; font-weight: 700;">Monstera Deliciosa</h3>
+                <div id="resScientific" style="font-size: 13px; color: var(--text-dim); font-style: italic;">Monstera deliciosa</div>
               </div>
               <div style="text-align: right;">
-                <div id="resScore" style="font-size: 28px; font-weight: 700; color: var(--accent-pink);">85%</div>
-                <div style="font-size: 10px; text-transform: uppercase; color: rgba(255,255,255,0.5);">Health Score</div>
+                <div id="resScore" style="font-size: 28px; font-weight: 800; color: var(--primary-light);">85%</div>
+                <div style="font-size: 10px; text-transform: uppercase; color: var(--text-dim); font-weight: 700;">Health Index</div>
               </div>
             </div>
 
-            <div class="result-badge" id="resStatusBadge">Healthy Foliage</div>
+            <div id="resStatusPill" style="display: inline-block; padding: 4px 12px; border-radius: 9999px; font-size: 11px; font-weight: 700; text-transform: uppercase; background: rgba(16, 185, 129, 0.15); color: #34d399; margin-bottom: 14px;">Healthy Foliage</div>
 
-            <p id="resSummary" style="font-size: 14px; line-height: 1.6; color: rgba(255,255,255,0.85); background: rgba(0,0,0,0.3); padding: 14px; border-radius: 10px; margin-bottom: 18px; border-left: 2px solid var(--accent-pink);">
-              Leaf cellular structure is intact with vibrant chlorophyll distribution and no acute signs of pathogenic necrosis.
-            </p>
+            <div id="resSummary" style="font-size: 14px; line-height: 1.6; color: #d1fae5; background: rgba(0,0,0,0.3); padding: 14px; border-radius: 10px; margin-bottom: 16px; border-left: 2px solid var(--primary-light);">
+              Cellular chlorophyll levels are balanced with no acute signs of parasitic or fungal infection.
+            </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px;">
-              <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; border: 1px solid var(--border-light);">
-                <div style="font-size: 11px; text-transform: uppercase; color: rgba(255,255,255,0.5); font-weight: 600;">Watering Strategy</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+              <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; border: 1px solid var(--card-border);">
+                <div style="font-size: 11px; text-transform: uppercase; color: var(--text-dim); font-weight: 700;">💧 Water Strategy</div>
                 <div id="resWater" style="font-size: 13px; font-weight: 600; margin-top: 2px;">Dry top 2 inches</div>
               </div>
-              <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; border: 1px solid var(--border-light);">
-                <div style="font-size: 11px; text-transform: uppercase; color: rgba(255,255,255,0.5); font-weight: 600;">Photometric Exposure</div>
+              <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; border: 1px solid var(--card-border);">
+                <div style="font-size: 11px; text-transform: uppercase; color: var(--text-dim); font-weight: 700;">☀️ Light Exposure</div>
                 <div id="resLight" style="font-size: 13px; font-weight: 600; margin-top: 2px;">Bright Indirect</div>
               </div>
             </div>
 
-            <div style="font-size: 11px; text-transform: uppercase; color: rgba(255,255,255,0.5); font-weight: 600; margin-bottom: 8px;">Actionable Prescriptions</div>
-            <div id="resRecommendations" style="font-size: 13px; color: rgba(255,255,255,0.75);"></div>
+            <div style="font-size: 11px; text-transform: uppercase; color: var(--text-dim); font-weight: 700; margin-bottom: 8px;">Actionable Recommendations:</div>
+            <div id="resRecsList" style="font-size: 13px; color: var(--text-muted);"></div>
           </div>
         </div>
       </div>
     </div>
   </section>
+
+  <!-- 02 / Services Page Section -->
+  <section class="page-section" id="section-services">
+    <div class="hero-container">
+      <div class="section-eyebrow">02 / Services Provided</div>
+      <h2 class="section-heading">Comprehensive <span>Botanical Solutions</span></h2>
+      <p class="section-sub">State-of-the-art identification, diagnostic models, and B2B API integrations tailored for agriculture, gardeners, and enterprises.</p>
+
+      <div class="box-grid">
+        <!-- Service 1 -->
+        <div class="feature-box">
+          <div class="feature-box-icon">⚡</div>
+          <h3>Identify Plants in Seconds</h3>
+          <p>Take multiple photos of your plant, upload them and let us work our magic. This web demo allows you to identify up to 10 plants per month for free.</p>
+          <span class="feature-tag">Free Tier Included</span>
+        </div>
+
+        <!-- Service 2 -->
+        <div class="feature-box">
+          <div class="feature-box-icon">🌿</div>
+          <h3>Plenty of Plants (35,000+ Taxa)</h3>
+          <p>Accurately identify more than 35,000 taxa of plants, mushrooms and lichen from around the world. We give you the common name, a short description and the classification of your plant in addition to the scientific (Latin) name.</p>
+          <span class="feature-tag">Global Taxa Database</span>
+        </div>
+
+        <!-- Service 3 -->
+        <div class="feature-box">
+          <div class="feature-box-icon">🩺</div>
+          <h3>Plant Diseases (548 Conditions)</h3>
+          <p>Is your plant sick? Could it be due to pests or a fungal disease, or is it simply overwatered? Our plant health engine can tell the difference! It can detect 548 different plant health conditions.</p>
+          <span class="feature-tag">Pathology Diagnostics</span>
+        </div>
+
+        <!-- Service 4 -->
+        <div class="feature-box">
+          <div class="feature-box-icon">🧠</div>
+          <h3>Power of Machine Learning (90%+ Accuracy)</h3>
+          <p>We use cutting-edge methods of machine learning (aka artificial intelligence) and train custom deep convolutional neural networks to ensure the best possible results. We estimate that we get the plant name right 90% of the time.</p>
+          <span class="feature-tag">Deep Neural Networks</span>
+        </div>
+
+        <!-- Service 5 -->
+        <div class="feature-box">
+          <div class="feature-box-icon">🔌</div>
+          <h3>PlantCare & Plant.id API</h3>
+          <p>Are you in the business of agriculture, the environment, or a smart garden and you need to identify plants and plant diseases? We offer our identification engine via API and custom solutions to meet your needs.</p>
+          <span class="feature-tag">B2B REST Endpoints</span>
+        </div>
+
+        <!-- Service 6 -->
+        <div class="feature-box">
+          <div class="feature-box-icon">📦</div>
+          <h3>Batch Identification</h3>
+          <p>Want to identify multiple images at once? Whether you're a student, hobbyist or have a collection of images to identify, our Batch Identification feature simplifies bulk processing—no complicated setup needed.</p>
+          <span class="feature-tag">Bulk Processing</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 / About Page Section -->
+  <section class="page-section" id="section-about">
+    <div class="hero-container">
+      <div class="section-eyebrow">03 / About Us</div>
+      <h2 class="section-heading">About <span>PlantCare AI</span></h2>
+      
+      <div class="about-lead-box">
+        <p>
+          <strong>PlantCare AI</strong> is an intelligent plant disease detection platform that leverages <strong>Artificial Intelligence, Deep Learning, and Computer Vision</strong> to analyze plant leaf images and provide accurate health assessments. By simply uploading a leaf image, users can instantly identify plant diseases, evaluate severity, and receive personalized treatment and prevention recommendations.
+        </p>
+        <p style="margin-top: 16px;">
+          Our mission is to make plant healthcare smarter, faster, and more accessible for farmers, gardeners, researchers, and plant enthusiasts. Through early disease detection and AI-driven insights, PlantCare AI helps users reduce crop loss, improve plant health, and promote sustainable agriculture.
+        </p>
+      </div>
+
+      <div style="margin-top: 40px;">
+        <h3 style="font-size: 24px; font-weight: 700; margin-bottom: 8px;">🌿 What We Offer</h3>
+        <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 20px;">Comprehensive capabilities designed for precision agricultural care:</p>
+
+        <div class="offerings-list">
+          <div class="offering-item">
+            <span class="offering-item-icon">✓</span>
+            <span>AI-powered plant disease detection</span>
+          </div>
+          <div class="offering-item">
+            <span class="offering-item-icon">✓</span>
+            <span>Instant health analysis from leaf images</span>
+          </div>
+          <div class="offering-item">
+            <span class="offering-item-icon">✓</span>
+            <span>Disease confidence score & severity assessment</span>
+          </div>
+          <div class="offering-item">
+            <span class="offering-item-icon">✓</span>
+            <span>Personalized treatment recommendations</span>
+          </div>
+          <div class="offering-item">
+            <span class="offering-item-icon">✓</span>
+            <span>Preventive care and plant protection tips</span>
+          </div>
+          <div class="offering-item">
+            <span class="offering-item-icon">✓</span>
+            <span>Fast, accurate, and user-friendly diagnosis</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="feature-box" style="margin-top: 40px; border-left: 4px solid var(--accent-pink);">
+        <h3 style="font-size: 22px; margin-bottom: 10px;">🚀 Our Vision</h3>
+        <p style="font-size: 15px; color: rgba(255, 255, 255, 0.9);">
+          To empower modern agriculture with intelligent technology by providing accessible, reliable, and efficient plant health solutions that support healthier crops and a more sustainable future.
+        </p>
+        <div style="font-weight: 700; color: var(--primary-light); margin-top: 14px; font-size: 16px;">
+          PlantCare AI — Scan. Detect. Protect.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 / Contact Page Section -->
+  <section class="page-section" id="section-contact">
+    <div class="hero-container">
+      <div class="section-eyebrow">04 / Contact Details</div>
+      <h2 class="section-heading">Contact Us & <span>Get in Touch</span></h2>
+      <p class="section-sub">Have questions, feedback, or suggestions? We'd love to hear from you. Whether you're experiencing an issue, have ideas for new features, or simply want to learn more about PlantCare AI, feel free to reach out.</p>
+
+      <div class="contact-grid">
+        <!-- Direct Contact Info -->
+        <div class="contact-card">
+          <h3 style="font-size: 22px; margin-bottom: 24px;">Direct Contact Information</h3>
+          
+          <div class="contact-info-row">
+            <div class="contact-info-icon">📧</div>
+            <div>
+              <div class="contact-info-label">Official Email</div>
+              <div class="contact-info-val">
+                <a href="mailto:ritul.gautam24@gmail.com">ritul.gautam24@gmail.com</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="contact-info-row">
+            <div class="contact-info-icon">📍</div>
+            <div>
+              <div class="contact-info-label">Headquarters / Location</div>
+              <div class="contact-info-val">India</div>
+            </div>
+          </div>
+
+          <div class="contact-info-row">
+            <div class="contact-info-icon">🌐</div>
+            <div>
+              <div class="contact-info-label">Website & Links</div>
+              <div class="contact-info-val">
+                <a href="http://www.plantcareai.com/" target="_blank">www.plantcareai.com</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="contact-info-row">
+            <div class="contact-info-icon">💼</div>
+            <div>
+              <div class="contact-info-label">LinkedIn</div>
+              <div class="contact-info-val">
+                <a href="https://linkedin.com/company/plantcareai" target="_blank">linkedin.com/company/plantcareai</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Why Contact Us & Promise -->
+        <div class="contact-card">
+          <h3 style="font-size: 22px; margin-bottom: 12px;">Why Contact Us?</h3>
+          <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">We actively assist researchers, farmers, and enthusiasts with:</p>
+
+          <div class="contact-reasons-list">
+            <div class="reason-pill">🛠 Technical Support</div>
+            <div class="reason-pill">🌿 Plant Diagnosis Assistance</div>
+            <div class="reason-pill">💡 Feature Requests & Suggestions</div>
+            <div class="reason-pill">🤝 Collaboration Opportunities</div>
+            <div class="reason-pill">📩 General Inquiries</div>
+          </div>
+
+          <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--card-border);">
+            <h4 style="font-size: 16px; margin-bottom: 8px; color: var(--primary-light);">Our Promise</h4>
+            <p style="font-size: 13px; color: var(--text-muted); line-height: 1.6;">
+              We are committed to providing timely support and continuously improving PlantCare AI to deliver a smarter, faster, and more reliable plant health diagnosis experience.
+            </p>
+            <div style="margin-top: 12px; font-weight: 700; font-size: 13px; color: #fff;">
+              🌱 PlantCare AI — Helping Plants Thrive with the Power of Artificial Intelligence.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Toast Notification -->
+  <div class="toast-popup" id="toast">Copied to clipboard!</div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="hero-container">
+      <p style="font-weight: 600; color: rgba(255,255,255,0.7); margin-bottom: 6px;">PlantCare AI — Scan. Detect. Protect.</p>
+      <p style="font-size: 12px;">Contact: <a href="mailto:ritul.gautam24@gmail.com" style="color: var(--primary-light); text-decoration: none;">ritul.gautam24@gmail.com</a> • India</p>
+    </div>
+  </footer>
 
   <script>
     // -------------------------------------------------------------
@@ -882,9 +1278,6 @@ function renderDashboardHtml() {
       'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260627_094019_4214ea73-b963-46a4-8327-61489192de99.mp4'
     ];
 
-    let activeVideoIndex = 0;
-
-    // Blob Preloader for instant playback
     window.addEventListener('DOMContentLoaded', () => {
       videoUrls.forEach((url, idx) => {
         fetch(url)
@@ -895,7 +1288,6 @@ function renderDashboardHtml() {
             if (vid) vid.src = objectUrl;
           })
           .catch(() => {
-            // Fallback to original URL if blob fetch fails
             const vid = document.getElementById('vid-' + idx);
             if (vid) vid.src = url;
           });
@@ -903,23 +1295,13 @@ function renderDashboardHtml() {
     });
 
     function switchVideo(index) {
-      activeVideoIndex = index;
-      
-      // Update video opacities
       for (let i = 0; i < 3; i++) {
         const vid = document.getElementById('vid-' + i);
         const btn = document.getElementById('switch-' + i);
-        if (vid) {
-          if (i === index) vid.classList.add('active');
-          else vid.classList.remove('active');
-        }
-        if (btn) {
-          if (i === index) btn.classList.add('active');
-          else btn.classList.remove('active');
-        }
+        if (vid) vid.classList.toggle('active', i === index);
+        if (btn) vid ? btn.classList.toggle('active', i === index) : null;
       }
 
-      // Slide 1 uses Pink (#F598F2), Slides 2-3 use White
       const statusDot = document.getElementById('statusDot');
       const titleDot = document.getElementById('titleDot');
       if (index === 0) {
@@ -932,8 +1314,19 @@ function renderDashboardHtml() {
     }
 
     // -------------------------------------------------------------
-    // Mobile Nav Toggle
+    // Page / Section Navigation
     // -------------------------------------------------------------
+    function navigateTo(sectionId) {
+      document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.getElementById('nav-btn-' + sectionId);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      const el = document.getElementById('section-' + sectionId);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+
     function toggleMobileNav() {
       const panel = document.getElementById('mobileNavPanel');
       const btn = document.getElementById('mobileMenuBtn');
@@ -949,19 +1342,14 @@ function renderDashboardHtml() {
       }
     }
 
-    function scrollToScanner() {
-      const el = document.getElementById('scanner');
-      if (el) el.scrollIntoView({ behavior: 'smooth' });
-    }
-
     // -------------------------------------------------------------
-    // Specimen Diagnostics Logic
+    // AI Scanner Workstation Logic
     // -------------------------------------------------------------
-    let selectedFile = null;
-    const fileInput = document.getElementById('plantFileInput');
-    const previewWrap = document.getElementById('previewWrap');
+    let activeFile = null;
+    const fileInput = document.getElementById('fileInput');
+    const previewBox = document.getElementById('previewBox');
     const previewImage = document.getElementById('previewImage');
-    const diagnoseBtn = document.getElementById('diagnoseBtn');
+    const scanBtn = document.getElementById('scanBtn');
 
     fileInput.addEventListener('change', (e) => {
       if (e.target.files && e.target.files[0]) {
@@ -969,69 +1357,78 @@ function renderDashboardHtml() {
       }
     });
 
+    const dropzone = document.getElementById('dropzone');
+    dropzone.addEventListener('dragover', (e) => { e.preventDefault(); });
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        loadFile(e.dataTransfer.files[0]);
+      }
+    });
+
     function loadFile(file) {
-      selectedFile = file;
+      activeFile = file;
       const reader = new FileReader();
       reader.onload = (e) => {
         previewImage.src = e.target.result;
-        previewWrap.style.display = 'block';
-        diagnoseBtn.disabled = false;
+        previewBox.style.display = 'block';
+        scanBtn.disabled = false;
       };
       reader.readAsDataURL(file);
     }
 
-    function loadSampleSpecimen(name, status) {
+    function loadSample(name, status) {
       const c = document.createElement('canvas');
       c.width = 400; c.height = 300;
       const ctx = c.getContext('2d');
       ctx.fillStyle = status === 'healthy' ? '#081c12' : (status === 'blight' ? '#241408' : '#141c18');
       ctx.fillRect(0, 0, 400, 300);
       ctx.fillStyle = '#ffffff';
-      ctx.font = '500 22px Figtree, sans-serif';
+      ctx.font = '600 20px Outfit, sans-serif';
       ctx.fillText(name, 24, 150);
       c.toBlob(blob => loadFile(blob), 'image/jpeg');
     }
 
-    async function runDiagnostics() {
-      if (!selectedFile) return;
+    async function executeDiagnosis() {
+      if (!activeFile) return;
 
-      diagnoseBtn.disabled = true;
-      diagnoseBtn.textContent = 'Analyzing Vision Signatures...';
-      document.getElementById('scanLine').style.display = 'block';
+      scanBtn.disabled = true;
+      scanBtn.textContent = 'Analyzing Pathological Signatures...';
+      document.getElementById('scanBeam').style.display = 'block';
 
       const fd = new FormData();
-      fd.append('image', selectedFile, 'specimen.jpg');
+      fd.append('image', activeFile, 'leaf_specimen.jpg');
 
       try {
         const res = await fetch('/scan', { method: 'POST', body: fd });
         const data = await res.json();
         renderResults(data);
       } catch (err) {
-        alert('Diagnostic error: ' + err.message);
+        alert('Diagnosis error: ' + err.message);
       } finally {
-        diagnoseBtn.disabled = false;
-        diagnoseBtn.textContent = 'Execute AI Health Diagnosis';
-        document.getElementById('scanLine').style.display = 'none';
+        scanBtn.disabled = false;
+        scanBtn.textContent = 'Execute AI Health Diagnosis';
+        document.getElementById('scanBeam').style.display = 'none';
       }
     }
 
     function renderResults(d) {
-      document.getElementById('emptyResults').style.display = 'none';
-      document.getElementById('fullResults').style.display = 'block';
+      document.getElementById('resultEmpty').style.display = 'none';
+      document.getElementById('resultCard').style.display = 'block';
 
-      document.getElementById('resPlantName').textContent = d.plant_name || 'Houseplant';
-      document.getElementById('resScientificName').textContent = d.scientific_name || 'Plantae';
+      document.getElementById('resPlantName').textContent = d.plant_name || 'Specimen';
+      document.getElementById('resScientific').textContent = d.scientific_name || 'Plantae';
       document.getElementById('resScore').textContent = (d.health_score || 85) + '%';
-      
-      const badge = document.getElementById('resStatusBadge');
-      const st = d.health_status || 'healthy';
-      badge.textContent = st.replace('_', ' ').toUpperCase();
 
-      document.getElementById('resSummary').textContent = d.summary || d.ai_explanation || 'Foliage analysis complete.';
+      const pill = document.getElementById('resStatusPill');
+      const st = d.health_status || 'healthy';
+      pill.textContent = st.replace('_', ' ').toUpperCase();
+
+      document.getElementById('resSummary').textContent = d.summary || d.ai_explanation || 'Visual diagnosis complete.';
       document.getElementById('resWater').textContent = (d.water && d.water.recommendation) || d.water_requirement || 'Allow topsoil to dry';
       document.getElementById('resLight').textContent = (d.light && d.light.recommendation) || d.light_requirement || 'Bright Indirect';
 
-      const recs = document.getElementById('resRecommendations');
+      const recs = document.getElementById('resRecsList');
       recs.innerHTML = '';
       (d.care_recommendations || ['Maintain standard hydration schedule']).forEach(r => {
         const item = document.createElement('div');
