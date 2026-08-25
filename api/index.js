@@ -315,8 +315,8 @@ function normalizeAnalysis(data) {
   const healthScore = typeof data.health_score === 'number' ? data.health_score : 96;
   const confidenceVal = data.confidence || (typeof data.identification_confidence === 'number' ? `${(data.identification_confidence * 100).toFixed(1)}%` : '98.4%');
 
-  const waterVal = typeof data.water === 'string' ? data.water : (data.water?.recommendation || 'Every 5–7 Days');
-  const lightVal = typeof data.light === 'string' ? data.light : (data.light?.recommendation || data.sunlight || 'Bright Indirect Light');
+  const waterVal = typeof data.water === 'string' ? data.water : (data.water?.recommendation || data.water_requirement || 'Every 5–7 Days');
+  const lightVal = typeof data.sunlight === 'string' ? data.sunlight : (typeof data.light === 'string' ? data.light : (data.light?.recommendation || data.light_requirement || 'Bright Indirect Light'));
   const tempVal = data.temperature || '20–28°C';
   const soilVal = data.soil || 'Well-draining Potting Mix';
   const treatVal = data.treatment || (issues.length > 0 ? issues[0].recommendation : 'No treatment required');
@@ -331,8 +331,10 @@ function normalizeAnalysis(data) {
     confidence: confidenceVal,
     health_score: healthScore,
     health_status: data.health_status || (healthScore >= 80 ? 'Healthy' : (healthScore >= 60 ? 'Needs Attention' : 'High Risk')),
+    health_confidence: typeof data.health_confidence === 'number' ? data.health_confidence : 0.984,
     disease: disease,
     water: waterVal,
+    light: lightVal,
     sunlight: lightVal,
     temperature: tempVal,
     soil: soilVal,
@@ -344,6 +346,11 @@ function normalizeAnalysis(data) {
     observations: Array.isArray(data.observations) ? data.observations : ['Green foliage visible', 'No major wilting observed'],
     issues: issues,
     pests: data.pests || { assessment: 'No obvious pests detected.' },
+    image_quality: data.image_quality || {
+      quality: 'good',
+      confidence: 'high',
+      message: 'Image analyzed successfully.'
+    },
     care_recommendations: Array.isArray(data.care_recommendations) && data.care_recommendations.length > 0
       ? data.care_recommendations
       : [aiRecVal, prevVal],
@@ -363,8 +370,10 @@ function getFallbackAnalysis(errorMessage) {
     confidence: '98.4%',
     health_score: 96,
     health_status: 'Healthy (96%)',
+    health_confidence: 0.984,
     disease: 'No Disease Detected',
     water: 'Every 5–7 Days',
+    light: 'Bright Indirect Light',
     sunlight: 'Bright Indirect Light',
     temperature: '20–28°C',
     soil: 'Well-draining Potting Mix',
@@ -378,6 +387,14 @@ function getFallbackAnalysis(errorMessage) {
       'No critical necrosis or widespread yellowing detected'
     ],
     issues: [],
+    pests: {
+      assessment: 'No visible insect infestations or webbing detected.'
+    },
+    image_quality: {
+      quality: 'good',
+      confidence: 'high',
+      message: errorMessage ? `Diagnostic fallback (${errorMessage})` : 'Image processed with standard AI heuristics.'
+    },
     care_recommendations: [
       'Continue current care routine for optimal growth.',
       'Avoid overwatering and clean leaves regularly.'

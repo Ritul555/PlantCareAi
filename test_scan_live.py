@@ -59,5 +59,7 @@ if __name__ == "__main__":
     try:
         test_scan()
         print("\n ALL SCAN TESTS PASSED SUCCESSFULLY!")
+    except urllib.error.HTTPError as e:
+        print("HTTP Error:", e.code, e.read().decode('utf-8', errors='ignore'))
     except Exception as e:
-        print(f"\n❌ Error during scan test: {e}")
+        print("Error during scan test:", str(e))
