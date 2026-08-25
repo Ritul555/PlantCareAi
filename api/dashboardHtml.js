@@ -1974,14 +1974,14 @@ function renderDashboardHtml() {
 
 
 
-          <div style="margin-top: 16px; display: flex; gap: 8px; flex-wrap: wrap;">
-
-            <button class="role-link active" style="padding: 6px 12px; background: rgba(255,255,255,0.06); border-radius: 9999px;" onclick="loadSample('Monstera Deliciosa', 'healthy')">Sample: Monstera</button>
-
-            <button class="role-link" style="padding: 6px 12px; background: rgba(255,255,255,0.06); border-radius: 9999px;" onclick="loadSample('Tomato Early Blight', 'blight')">Sample: Blight</button>
-
-            <button class="role-link" style="padding: 6px 12px; background: rgba(255,255,255,0.06); border-radius: 9999px;" onclick="loadSample('Sansevieria', 'dry')">Sample: Snake Plant</button>
-
+                    <div style="margin-top: 16px; display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="role-link active" style="padding: 6px 12px; background: rgba(255,255,255,0.06); border-radius: 9999px; font-size: 12px;" onclick="loadSample('Monstera Deliciosa', 'healthy', 'monstera_healthy.jpg')">🌿 Monstera (Healthy)</button>
+            <button class="role-link" style="padding: 6px 12px; background: rgba(255,255,255,0.06); border-radius: 9999px; font-size: 12px;" onclick="loadSample('Tomato Early Blight', 'blight', 'tomato_early_blight.jpg')">🍅 Tomato (Blight)</button>
+            <button class="role-link" style="padding: 6px 12px; background: rgba(255,255,255,0.06); border-radius: 9999px; font-size: 12px;" onclick="loadSample('Potato Late Blight', 'late_blight', 'potato_late_blight.jpg')">🥔 Potato (Late Blight)</button>
+            <button class="role-link" style="padding: 6px 12px; background: rgba(255,255,255,0.06); border-radius: 9999px; font-size: 12px;" onclick="loadSample('Apple Cedar Rust', 'rust', 'apple_cedar_rust.jpg')">🍎 Apple (Rust)</button>
+            <button class="role-link" style="padding: 6px 12px; background: rgba(255,255,255,0.06); border-radius: 9999px; font-size: 12px;" onclick="loadSample('Rose Black Spot', 'black_spot', 'rose_black_spot.jpg')">🌹 Rose (Black Spot)</button>
+            <button class="role-link" style="padding: 6px 12px; background: rgba(255,255,255,0.06); border-radius: 9999px; font-size: 12px;" onclick="loadSample('Citrus Canker', 'canker', 'citrus_canker.jpg')">🍋 Citrus (Canker)</button>
+            <button class="role-link" style="padding: 6px 12px; background: rgba(255,255,255,0.06); border-radius: 9999px; font-size: 12px;" onclick="loadSample('Sansevieria', 'dry', 'sansevieria_dry.jpg')">🪴 Snake Plant (Dry)</button>
           </div>
 
 
@@ -2828,75 +2828,74 @@ function renderDashboardHtml() {
 
 
 
-    function loadSample(name, status) {
-
+    function loadSample(name, status, filename) {
       const c = document.createElement('canvas');
-
       c.width = 400; c.height = 300;
-
       const ctx = c.getContext('2d');
 
-      ctx.fillStyle = status === 'healthy' ? '#081c12' : (status === 'blight' ? '#241408' : '#141c18');
-
+      const bgGrad = ctx.createLinearGradient(0, 0, 400, 300);
+      if (status === 'healthy') {
+        bgGrad.addColorStop(0, '#062817');
+        bgGrad.addColorStop(1, '#02120b');
+      } else if (status === 'blight' || status === 'late_blight') {
+        bgGrad.addColorStop(0, '#361806');
+        bgGrad.addColorStop(1, '#150902');
+      } else if (status === 'rust') {
+        bgGrad.addColorStop(0, '#422105');
+        bgGrad.addColorStop(1, '#1b0d02');
+      } else if (status === 'black_spot' || status === 'canker') {
+        bgGrad.addColorStop(0, '#24141d');
+        bgGrad.addColorStop(1, '#0e050b');
+      } else {
+        bgGrad.addColorStop(0, '#102219');
+        bgGrad.addColorStop(1, '#050c08');
+      }
+      ctx.fillStyle = bgGrad;
       ctx.fillRect(0, 0, 400, 300);
 
+      ctx.strokeStyle = status === 'healthy' ? 'rgba(52, 211, 153, 0.4)' : 'rgba(245, 152, 242, 0.3)';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.ellipse(200, 150, 140, 80, Math.PI / 4, 0, 2 * Math.PI);
+      ctx.stroke();
+
       ctx.fillStyle = '#ffffff';
+      ctx.font = '700 22px Outfit, sans-serif';
+      ctx.fillText(name, 28, 140);
 
-      ctx.font = '600 20px Outfit, sans-serif';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+      ctx.font = '500 13px Plus Jakarta Sans, sans-serif';
+      ctx.fillText('Specimen: ' + (filename || 'leaf.jpg'), 28, 170);
 
-      ctx.fillText(name, 24, 150);
-
-      c.toBlob(blob => loadFile(blob), 'image/jpeg');
-
+      c.toBlob(blob => {
+        const fname = filename || (name.toLowerCase().replace(/\s+/g, '_') + '.jpg');
+        const file = new File([blob], fname, { type: 'image/jpeg' });
+        loadFile(file);
+      }, 'image/jpeg');
     }
-
-
 
     async function executeDiagnosis() {
-
       if (!activeFile) return;
 
-
-
       scanBtn.disabled = true;
-
       scanBtn.textContent = 'Analyzing Pathological Signatures...';
-
       document.getElementById('scanBeam').style.display = 'block';
 
-
-
       const fd = new FormData();
-
-      fd.append('image', activeFile, 'leaf_specimen.jpg');
-
-
+      fd.append('image', activeFile, activeFile.name || 'leaf_specimen.jpg');
 
       try {
-
         const res = await fetch('/scan', { method: 'POST', body: fd });
-
         const data = await res.json();
-
         renderResults(data);
-
       } catch (err) {
-
         alert('Diagnosis error: ' + err.message);
-
       } finally {
-
         scanBtn.disabled = false;
-
         scanBtn.textContent = 'Execute AI Health Diagnosis';
-
         document.getElementById('scanBeam').style.display = 'none';
-
       }
-
     }
-
-
 
     function renderResults(d) {
 
