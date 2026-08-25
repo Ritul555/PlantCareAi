@@ -1458,7 +1458,7 @@ function renderDashboardHtml() {
 
       const healthScore = d.health_score || 96;
       const rawStatus = d.health_status || 'Healthy';
-      const formattedStatus = rawStatus.includes('%') ? rawStatus : `${rawStatus} (${healthScore}%)`;
+      const formattedStatus = rawStatus.includes('%') ? rawStatus : (rawStatus + ' (' + healthScore + '%)');
       document.getElementById('resHealthStatus').textContent = formattedStatus;
 
       document.getElementById('resDisease').textContent = d.disease || (d.detected_disease || 'No Disease Detected');
