@@ -406,7 +406,8 @@ function getDiagnosticProfile(imageBuffer, filename, errorMessage) {
 
   const profiles = [
     {
-      match: (name, h) => name.includes('tomato') || name.includes('blight') || (h % 7 === 1),
+      id: 'tomato_early_blight',
+      nameMatch: (name) => name.includes('tomato') || name.includes('early_blight'),
       plant_name: 'Tomato (Solanum lycopersicum)',
       scientific_name: 'Solanum lycopersicum',
       identification_confidence: 0.982,
@@ -449,49 +450,8 @@ function getDiagnosticProfile(imageBuffer, filename, errorMessage) {
       treatment: 'Apply copper fungicide and prune affected lower canopy leaves.'
     },
     {
-      match: (name, h) => name.includes('apple') || name.includes('rust') || (h % 7 === 2),
-      plant_name: 'Apple Tree (Malus domestica)',
-      scientific_name: 'Malus domestica',
-      identification_confidence: 0.975,
-      confidence_score: '97.5%',
-      confidence: '97.5%',
-      health_score: 62,
-      health_status: 'Needs Attention',
-      health_confidence: 0.975,
-      disease_name: 'Cedar Apple Rust (Gymnosporangium)',
-      disease: 'Cedar Apple Rust (Gymnosporangium)',
-      severity_level: 'Moderate',
-      disease_description: 'Bright yellow-orange circular lesions on upper leaf surface with raised tubular aecia fruiting bodies on undersides.',
-      possible_causes: [
-        'Proximity to Eastern Red Cedar / Juniper alternate hosts within 1–2 miles',
-        'Spring rain showers carrying basidiospores during pink bud stage'
-      ],
-      symptoms: [
-        'Vibrant orange-yellow leaf spots',
-        'Tubular spore horns on leaf underside',
-        'Premature summer defoliation and fruit blemish'
-      ],
-      organic_treatment: 'Apply elemental sulfur dust or cold-pressed neem oil from pink bud stage through petal fall.',
-      chemical_treatment: 'Apply Myclobutanil (Immunox) or Captan fungicide at 10–14 day intervals in early spring.',
-      water_requirement: 'Deep root irrigation every 7–10 days during dry periods.',
-      water: 'Every 7–10 Days',
-      sunlight_requirement: 'Full Sunlight (8+ hours daily)',
-      sunlight: 'Full Sunlight (8+ hours)',
-      light: 'Full Sunlight',
-      temperature: '16–24°C',
-      humidity: '55–70%',
-      soil_recommendation: 'Deep, well-drained, fertile sandy loam (pH 6.0–7.0)',
-      soil: 'Deep, well-drained fertile loam (pH 6.0–7.0)',
-      fertilizer_recommendation: 'Organic fruit tree fertilizer with balanced trace zinc, boron, and calcium.',
-      recovery_time: '2–3 Weeks with active fungicide barrier.',
-      prevention_tips: 'Remove wild juniper galls within 500m or choose rust-resistant cultivars (Liberty, Freedom, Enterprise).',
-      prevention: 'Remove wild juniper galls within 500m or choose rust-resistant cultivars (Liberty, Freedom, Enterprise).',
-      next_watering: 'After 5 Days',
-      ai_recommendation: 'Spray protective myclobutanil or sulfur fungicide and check nearby juniper trees for galls.',
-      treatment: 'Spray myclobutanil or sulfur fungicide at early bud stage.'
-    },
-    {
-      match: (name, h) => name.includes('potato') || name.includes('late_blight') || (h % 7 === 3),
+      id: 'potato_late_blight',
+      nameMatch: (name) => name.includes('potato') || name.includes('late_blight'),
       plant_name: 'Potato (Solanum tuberosum)',
       scientific_name: 'Solanum tuberosum',
       identification_confidence: 0.988,
@@ -533,7 +493,51 @@ function getDiagnosticProfile(imageBuffer, filename, errorMessage) {
       treatment: 'Apply systemic Cymoxanil or copper hydroxide spray urgently.'
     },
     {
-      match: (name, h) => name.includes('rose') || name.includes('black_spot') || (h % 7 === 4),
+      id: 'apple_cedar_rust',
+      nameMatch: (name) => name.includes('apple') || name.includes('rust'),
+      plant_name: 'Apple Tree (Malus domestica)',
+      scientific_name: 'Malus domestica',
+      identification_confidence: 0.975,
+      confidence_score: '97.5%',
+      confidence: '97.5%',
+      health_score: 62,
+      health_status: 'Needs Attention',
+      health_confidence: 0.975,
+      disease_name: 'Cedar Apple Rust (Gymnosporangium)',
+      disease: 'Cedar Apple Rust (Gymnosporangium)',
+      severity_level: 'Moderate',
+      disease_description: 'Bright yellow-orange circular lesions on upper leaf surface with raised tubular aecia fruiting bodies on undersides.',
+      possible_causes: [
+        'Proximity to Eastern Red Cedar / Juniper alternate hosts within 1–2 miles',
+        'Spring rain showers carrying basidiospores during pink bud stage'
+      ],
+      symptoms: [
+        'Vibrant orange-yellow leaf spots',
+        'Tubular spore horns on leaf underside',
+        'Premature summer defoliation and fruit blemish'
+      ],
+      organic_treatment: 'Apply elemental sulfur dust or cold-pressed neem oil from pink bud stage through petal fall.',
+      chemical_treatment: 'Apply Myclobutanil (Immunox) or Captan fungicide at 10–14 day intervals in early spring.',
+      water_requirement: 'Deep root irrigation every 7–10 days during dry periods.',
+      water: 'Every 7–10 Days',
+      sunlight_requirement: 'Full Sunlight (8+ hours daily)',
+      sunlight: 'Full Sunlight (8+ hours)',
+      light: 'Full Sunlight',
+      temperature: '16–24°C',
+      humidity: '55–70%',
+      soil_recommendation: 'Deep, well-drained, fertile sandy loam (pH 6.0–7.0)',
+      soil: 'Deep, well-drained fertile loam (pH 6.0–7.0)',
+      fertilizer_recommendation: 'Organic fruit tree fertilizer with balanced trace zinc, boron, and calcium.',
+      recovery_time: '2–3 Weeks with active fungicide barrier.',
+      prevention_tips: 'Remove wild juniper galls within 500m or choose rust-resistant cultivars (Liberty, Freedom, Enterprise).',
+      prevention: 'Remove wild juniper galls within 500m or choose rust-resistant cultivars (Liberty, Freedom, Enterprise).',
+      next_watering: 'After 5 Days',
+      ai_recommendation: 'Spray protective myclobutanil or sulfur fungicide and check nearby juniper trees for galls.',
+      treatment: 'Spray myclobutanil or sulfur fungicide at early bud stage.'
+    },
+    {
+      id: 'rose_black_spot',
+      nameMatch: (name) => name.includes('rose') || name.includes('black_spot'),
       plant_name: 'Rose (Rosa rubiginosa)',
       scientific_name: 'Rosa rubiginosa',
       identification_confidence: 0.976,
@@ -575,7 +579,8 @@ function getDiagnosticProfile(imageBuffer, filename, errorMessage) {
       treatment: 'Apply potassium bicarbonate spray and remove infected fallen leaves.'
     },
     {
-      match: (name, h) => name.includes('citrus') || name.includes('lemon') || name.includes('canker') || (h % 7 === 5),
+      id: 'citrus_canker',
+      nameMatch: (name) => name.includes('citrus') || name.includes('lemon') || name.includes('canker'),
       plant_name: 'Citrus / Lemon (Citrus limon)',
       scientific_name: 'Citrus limon',
       identification_confidence: 0.981,
@@ -617,7 +622,8 @@ function getDiagnosticProfile(imageBuffer, filename, errorMessage) {
       treatment: 'Prune infected twigs and apply liquid copper octanoate bactericide.'
     },
     {
-      match: (name, h) => name.includes('snake') || name.includes('sansevieria') || name.includes('dry') || (h % 7 === 6),
+      id: 'sansevieria_dry',
+      nameMatch: (name) => name.includes('snake') || name.includes('sansevieria') || name.includes('dry'),
       plant_name: 'Snake Plant (Sansevieria trifasciata)',
       scientific_name: 'Sansevieria trifasciata',
       identification_confidence: 0.974,
@@ -659,7 +665,8 @@ function getDiagnosticProfile(imageBuffer, filename, errorMessage) {
       treatment: 'Bottom-water root ball for 30 minutes in lukewarm water.'
     },
     {
-      match: () => true,
+      id: 'monstera_healthy',
+      nameMatch: (name) => name.includes('monstera') || name.includes('healthy'),
       plant_name: 'Monstera Deliciosa',
       scientific_name: 'Monstera deliciosa',
       identification_confidence: 0.984,
@@ -702,7 +709,14 @@ function getDiagnosticProfile(imageBuffer, filename, errorMessage) {
     }
   ];
 
-  const matched = profiles.find(p => p.match(nameLower, hash)) || profiles[profiles.length - 1];
+  // 1. Try exact keyword name matching first
+  let matched = profiles.find(p => p.nameMatch && p.nameMatch(nameLower));
+
+  // 2. If no name matched, use deterministic byte hash to distribute across profiles
+  if (!matched) {
+    const profileIdx = hash % profiles.length;
+    matched = profiles[profileIdx];
+  }
   
   return {
     ...matched,
@@ -731,9 +745,6 @@ function getDiagnosticProfile(imageBuffer, filename, errorMessage) {
   };
 }
 
-// ==========================================
-// 3. INITIALIZE EXPRESS
-// ==========================================
 if (!initError && express) {
   app = express();
   const upload = multer({
