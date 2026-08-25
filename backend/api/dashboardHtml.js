@@ -4,29 +4,21 @@ function renderDashboardHtml() {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PlantCare AI — Intelligent Botanical Health & Diagnostics</title>
+  <title>PlantCare AI — Botanical Vision Intelligence</title>
+  
+  <!-- Google Fonts: Figtree -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
+  
   <style>
     :root {
-      --bg: #080d0a;
-      --bg-subtle: #0e1511;
-      --card-bg: rgba(16, 24, 20, 0.65);
-      --card-bg-hover: rgba(22, 34, 28, 0.85);
-      --border: rgba(255, 255, 255, 0.08);
-      --border-active: rgba(52, 211, 153, 0.35);
-      --primary: #10b981;
-      --primary-light: #34d399;
-      --primary-glow: rgba(16, 185, 129, 0.2);
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --text-dim: #64748b;
-      --radius-sm: 8px;
-      --radius-md: 12px;
-      --radius-lg: 18px;
-      --radius-full: 9999px;
-      --transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+      --accent-pink: #F598F2;
+      --accent-pink-glow: rgba(245, 152, 242, 0.45);
+      --text-white: #ffffff;
+      --border-light: rgba(255, 255, 255, 0.15);
+      --card-bg: rgba(10, 10, 10, 0.75);
     }
 
     * {
@@ -34,1106 +26,1019 @@ function renderDashboardHtml() {
       margin: 0;
       padding: 0;
       -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
     body {
-      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-      background-color: var(--bg);
-      background-image: 
-        radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.08) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(5, 150, 105, 0.06) 0px, transparent 50%);
-      color: var(--text);
+      font-family: 'Figtree', sans-serif;
+      background-color: #000000;
+      color: var(--text-white);
       min-height: 100vh;
-      line-height: 1.6;
-      letter-spacing: -0.01em;
+      overflow-x: hidden;
+      position: relative;
     }
 
-    .container {
-      max-width: 1180px;
-      margin: 0 auto;
-      padding: 0 24px;
-    }
-
-    /* Minimalist Header */
-    header {
-      border-bottom: 1px solid var(--border);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      background: rgba(8, 13, 10, 0.8);
-      position: sticky;
+    /* Video Background Stack */
+    .video-background-container {
+      position: fixed;
       top: 0;
-      z-index: 100;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      z-index: 0;
+      pointer-events: none;
     }
-    .header-inner {
-      height: 70px;
+
+    .bg-video {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      min-width: 100%;
+      min-height: 100%;
+      width: auto;
+      height: auto;
+      transform: translate(-50%, -50%);
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 1200ms ease-in-out;
+    }
+
+    .bg-video.active {
+      opacity: 1;
+    }
+
+    .video-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.25);
+      z-index: 1;
+    }
+
+    /* Common Container */
+    .hero-container {
+      max-width: 1340px;
+      margin: 0 auto;
+      padding-left: 15px;
+      padding-right: 15px;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Navbar */
+    header {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 20;
+    }
+
+    .navbar-inner {
+      padding-top: 36px;
+      padding-bottom: 36px;
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
-    .brand {
+
+    .nav-links-left {
       display: flex;
       align-items: center;
-      gap: 10px;
-      text-decoration: none;
-      color: var(--text);
-    }
-    .brand-icon {
-      width: 34px;
-      height: 34px;
-      border-radius: var(--radius-md);
-      background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.4));
-      border: 1px solid var(--border-active);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--primary-light);
-    }
-    .brand-name {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 19px;
-      font-weight: 700;
-      letter-spacing: -0.03em;
-    }
-    .brand-name span {
-      color: var(--primary-light);
+      gap: 32px;
     }
 
-    .nav-pill-group {
+    .nav-item {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      text-decoration: none;
+      color: var(--text-white);
+      position: relative;
+      padding-bottom: 4px;
+      cursor: pointer;
+    }
+
+    .nav-index {
+      font-size: 8px;
+      line-height: 12px;
+      letter-spacing: -0.08px;
+      font-weight: 500;
+      text-transform: uppercase;
+      opacity: 0.6;
+    }
+
+    .nav-label {
+      font-size: 12px;
+      line-height: 16px;
+      letter-spacing: -0.12px;
+      font-weight: 500;
+      text-transform: uppercase;
+    }
+
+    .nav-link-underline {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 100%;
+      height: 1px;
+      background-color: var(--text-white);
+      transform: scaleX(0);
+      transform-origin: right;
+      transition: transform 0.4s var(--ease-spring);
+    }
+
+    .nav-item:hover .nav-link-underline {
+      transform: scaleX(1);
+      transform-origin: left;
+    }
+
+    .nav-right {
       display: flex;
       align-items: center;
-      background: var(--bg-subtle);
-      border: 1px solid var(--border);
-      padding: 4px;
-      border-radius: var(--radius-full);
-      gap: 2px;
+      gap: 32px;
+      text-align: right;
     }
-    .nav-pill {
+
+    .nav-email {
+      font-size: 12px;
+      line-height: 16px;
+      letter-spacing: -0.12px;
+      font-weight: 500;
+      text-decoration: none;
+      color: var(--text-white);
+      opacity: 0.8;
+      transition: opacity 0.2s;
+    }
+    .nav-email:hover { opacity: 1; }
+
+    .nav-clock {
+      font-size: 12px;
+      line-height: 16px;
+      letter-spacing: -0.12px;
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+      opacity: 0.9;
+    }
+
+    /* Mobile Menu Toggle */
+    .mobile-menu-btn {
+      display: none;
+      background: transparent;
+      border: 1px solid var(--border-light);
+      color: var(--text-white);
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 12px;
+      text-transform: uppercase;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .mobile-nav-panel {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 420ms var(--ease-spring);
+      overflow: hidden;
+      background: rgba(0, 0, 0, 0.9);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-light);
+    }
+    .mobile-nav-panel.open {
+      grid-template-rows: 1fr;
+    }
+    .mobile-nav-content {
+      min-height: 0;
+      padding: 0 18px;
+    }
+    .mobile-nav-panel.open .mobile-nav-content {
+      padding: 24px 18px 32px;
+    }
+    .mobile-nav-link {
+      display: block;
+      font-size: 28px;
+      line-height: 32px;
+      letter-spacing: -0.84px;
+      font-weight: 500;
+      text-transform: uppercase;
+      color: var(--text-white);
+      text-decoration: none;
+      margin-bottom: 18px;
+    }
+
+    /* Hero Section */
+    .hero-section {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding-top: 190px;
+      padding-bottom: 60px;
+    }
+
+    .hero-flex-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 150px;
+      width: 100%;
+    }
+
+    /* Upper Section: Video Switcher + Availability */
+    .hero-upper {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    .switcher-col {
+      flex: 4;
+      display: flex;
+      gap: 28px;
+      flex-wrap: wrap;
+    }
+
+    .role-link {
       background: transparent;
       border: none;
-      color: var(--text-muted);
-      font-size: 13px;
-      font-weight: 500;
-      padding: 6px 16px;
-      border-radius: var(--radius-full);
+      color: var(--text-white);
       cursor: pointer;
-      transition: var(--transition);
+      font-family: 'Figtree', sans-serif;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      opacity: 0.55;
+      transition: all 0.3s var(--ease-spring);
+      display: inline-block;
     }
-    .nav-pill:hover {
-      color: var(--text);
+    .role-link:hover {
+      opacity: 0.75;
+      transform: translateX(4px);
     }
-    .nav-pill.active {
-      background: rgba(255, 255, 255, 0.08);
-      color: var(--text);
+    .role-link.active {
+      opacity: 1;
       font-weight: 600;
+      transform: translateX(0);
     }
 
-    .header-actions {
+    .availability-col {
+      flex: 1;
       display: flex;
       align-items: center;
-      gap: 12px;
+      justify-content: flex-end;
+      gap: 10px;
     }
-    .live-badge {
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background-color: var(--accent-pink);
+      box-shadow: 0 0 10px var(--accent-pink-glow);
+      animation: dotPulse 1.6s infinite ease-in-out;
+      transition: background-color 0.5s, box-shadow 0.5s;
+    }
+    .status-dot.white-dot {
+      background-color: #ffffff;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+    }
+
+    @keyframes dotPulse {
+      0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 0.45;
+        transform: scale(1.45);
+      }
+    }
+
+    .status-text {
+      font-size: 13px;
+      line-height: 16px;
+      font-weight: 500;
+      letter-spacing: -0.13px;
+      white-space: nowrap;
+    }
+
+    /* Lower Section: Name + CTA */
+    .hero-lower {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    .name-col {
+      flex: 2;
+    }
+
+    .hero-title {
+      font-size: 200px;
+      line-height: 81%;
+      letter-spacing: -6px;
+      font-weight: 500;
+      text-transform: uppercase;
+      margin: 0;
+      animation: revealUp 0.9s var(--ease-spring) forwards;
+    }
+
+    .hero-title .title-dot {
+      color: var(--accent-pink);
+      transition: color 0.5s;
+    }
+    .hero-title .title-dot.white-dot {
+      color: #ffffff;
+    }
+
+    .cta-col {
+      flex: 1;
+      padding-left: 50px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 24px;
+    }
+
+    .hero-desc {
+      font-size: 16px;
+      line-height: 24px;
+      letter-spacing: -0.16px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.9);
+      max-width: 380px;
+      animation: revealRight 0.9s var(--ease-spring) forwards;
+    }
+
+    /* Start Project / Launch AI Button with Fill-Up Animation */
+    .btn-project {
+      position: relative;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      font-size: 12px;
-      color: var(--primary-light);
-      background: rgba(16, 185, 129, 0.1);
-      border: 1px solid rgba(16, 185, 129, 0.25);
-      padding: 4px 10px;
-      border-radius: var(--radius-full);
-      font-weight: 500;
-    }
-    .live-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--primary-light);
-      box-shadow: 0 0 8px var(--primary-light);
-    }
-
-    .btn-outline {
+      justify-content: center;
+      padding: 14px 28px;
+      border: 1px solid #ffffff;
+      border-radius: 9999px;
       background: transparent;
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 7px 15px;
-      border-radius: var(--radius-full);
-      font-size: 13px;
+      color: #ffffff;
+      font-family: 'Figtree', sans-serif;
+      font-size: 14px;
       font-weight: 500;
+      text-transform: lowercase;
+      text-decoration: none;
       cursor: pointer;
-      transition: var(--transition);
-    }
-    .btn-outline:hover {
-      border-color: rgba(255, 255, 255, 0.25);
-      background: rgba(255, 255, 255, 0.04);
+      overflow: hidden;
+      transition: color 0.4s var(--ease-spring), border-color 0.4s var(--ease-spring);
+      animation: revealRight 0.9s var(--ease-spring) 0.08s forwards;
+      opacity: 0;
+      animation-fill-mode: forwards;
+      z-index: 1;
     }
 
-    /* Minimalist Hero */
-    .hero {
-      padding: 56px 0 40px;
-      text-align: center;
+    .btn-project::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: var(--accent-pink);
+      transform: translateY(101%);
+      transition: transform 0.45s var(--ease-spring);
+      z-index: -1;
     }
-    .hero-eyebrow {
-      font-size: 12px;
+
+    .btn-project:hover {
+      color: #000000;
+      border-color: var(--accent-pink);
+    }
+
+    .btn-project:hover::before {
+      transform: translateY(0);
+    }
+
+    /* Animations */
+    @keyframes revealUp {
+      from {
+        opacity: 0;
+        transform: translateY(80px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes revealRight {
+      from {
+        opacity: 0;
+        transform: translateX(100px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    /* Interactive PlantCare AI Scanner Modal & Workspace */
+    .interactive-panel {
+      position: relative;
+      z-index: 10;
+      background: rgba(8, 8, 8, 0.92);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
+      border-top: 1px solid var(--border-light);
+      padding: 80px 0 100px;
+    }
+
+    .panel-header {
+      text-align: center;
+      margin-bottom: 50px;
+    }
+    .panel-title {
+      font-size: 40px;
       font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--primary-light);
+      letter-spacing: -1.5px;
       margin-bottom: 12px;
     }
-    .hero h1 {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 44px;
-      font-weight: 700;
-      line-height: 1.15;
-      letter-spacing: -0.04em;
-      margin-bottom: 14px;
-      max-width: 720px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    .hero p {
+    .panel-sub {
       font-size: 15px;
-      color: var(--text-muted);
-      max-width: 540px;
+      color: rgba(255, 255, 255, 0.65);
+      max-width: 500px;
       margin: 0 auto;
     }
 
-    /* Content Cards */
-    .view-panel {
-      display: none;
-    }
-    .view-panel.active {
-      display: block;
-      animation: fadeIn 0.25s ease-out;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .glass-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      padding: 28px;
-      transition: var(--transition);
-    }
-
-    /* Scanner Grid */
-    .scanner-grid {
+    .workspace-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 24px;
-      margin-bottom: 40px;
-    }
-    @media (max-width: 860px) {
-      .scanner-grid { grid-template-columns: 1fr; }
-      .hero h1 { font-size: 32px; }
-      .nav-pill-group { display: none; }
+      gap: 30px;
     }
 
-    .dropzone {
-      border: 1px dashed rgba(255, 255, 255, 0.15);
-      border-radius: var(--radius-md);
-      padding: 36px 20px;
+    .card-box {
+      background: rgba(18, 18, 18, 0.6);
+      border: 1px solid var(--border-light);
+      border-radius: 20px;
+      padding: 32px;
+    }
+
+    .upload-zone {
+      border: 1px dashed rgba(255, 255, 255, 0.25);
+      border-radius: 14px;
+      padding: 40px 20px;
       text-align: center;
       cursor: pointer;
-      background: rgba(0, 0, 0, 0.2);
-      transition: var(--transition);
-      position: relative;
-      overflow: hidden;
+      transition: border-color 0.3s;
+      background: rgba(0, 0, 0, 0.3);
     }
-    .dropzone:hover, .dropzone.dragover {
-      border-color: var(--primary-light);
-      background: rgba(16, 185, 129, 0.04);
+    .upload-zone:hover {
+      border-color: var(--accent-pink);
     }
-    .dropzone-icon {
-      width: 44px;
-      height: 44px;
-      margin: 0 auto 14px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--primary-light);
-    }
-    .dropzone h4 {
-      font-size: 15px;
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-    .dropzone p {
-      font-size: 13px;
-      color: var(--text-dim);
+    .upload-icon {
+      font-size: 32px;
+      margin-bottom: 12px;
+      opacity: 0.8;
     }
 
-    .preview-box {
-      position: relative;
+    .preview-wrap {
       display: none;
-      margin-top: 14px;
-      border-radius: var(--radius-md);
+      margin-top: 16px;
+      border-radius: 12px;
       overflow: hidden;
-      max-height: 240px;
-      border: 1px solid var(--border);
+      max-height: 260px;
+      position: relative;
     }
-    .preview-box img {
+    .preview-wrap img {
       width: 100%;
-      height: 240px;
+      height: 260px;
       object-fit: cover;
     }
-    .scan-beam {
+
+    .scan-line {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 2px;
-      background: linear-gradient(90deg, transparent, var(--primary-light), transparent);
-      box-shadow: 0 0 10px var(--primary-light);
+      background: var(--accent-pink);
+      box-shadow: 0 0 12px var(--accent-pink);
       display: none;
-      animation: scanAnim 2s infinite ease-in-out;
+      animation: scanLaser 2s infinite ease-in-out;
     }
-    @keyframes scanAnim {
+    @keyframes scanLaser {
       0% { top: 0; }
       50% { top: 98%; }
       100% { top: 0; }
     }
 
-    .preset-chips {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-top: 16px;
-    }
-    .chip {
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      font-size: 12px;
-      font-weight: 500;
-      padding: 5px 12px;
-      border-radius: var(--radius-full);
-      cursor: pointer;
-      transition: var(--transition);
-    }
-    .chip:hover {
-      background: rgba(16, 185, 129, 0.1);
-      border-color: var(--border-active);
-      color: var(--primary-light);
-    }
-
-    .btn-primary {
+    .btn-action {
       width: 100%;
-      margin-top: 18px;
-      padding: 12px;
-      border-radius: var(--radius-md);
-      background: var(--primary);
-      color: #04140b;
+      margin-top: 20px;
+      padding: 14px;
+      border-radius: 9999px;
+      background: #ffffff;
+      color: #000000;
+      font-family: inherit;
       font-size: 14px;
       font-weight: 600;
       border: none;
       cursor: pointer;
-      transition: var(--transition);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
+      transition: all 0.3s;
     }
-    .btn-primary:hover:not(:disabled) {
-      background: var(--primary-light);
-      box-shadow: 0 4px 16px var(--primary-glow);
+    .btn-action:hover:not(:disabled) {
+      background: var(--accent-pink);
+      box-shadow: 0 0 20px var(--accent-pink-glow);
     }
-    .btn-primary:disabled {
-      opacity: 0.5;
+    .btn-action:disabled {
+      opacity: 0.4;
       cursor: not-allowed;
     }
 
-    /* Result Panel */
-    .empty-state {
-      text-align: center;
-      padding: 50px 20px;
-      color: var(--text-dim);
-    }
-    .empty-state svg {
-      width: 48px;
-      height: 48px;
-      margin-bottom: 14px;
-      opacity: 0.3;
-    }
-    .result-content {
-      display: none;
-    }
-
-    .result-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
+    .result-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 11px;
+      text-transform: uppercase;
+      font-weight: 700;
+      background: rgba(245, 152, 242, 0.15);
+      color: var(--accent-pink);
+      border: 1px solid rgba(245, 152, 242, 0.4);
       margin-bottom: 16px;
     }
-    .species-name {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 22px;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-    }
-    .scientific-name {
-      font-size: 13px;
-      color: var(--text-dim);
-      font-style: italic;
+
+    /* Responsive Breakpoints */
+    /* Tablet: 810px - 1199.98px */
+    @media (min-width: 810px) and (max-width: 1199.98px) {
+      .navbar-inner {
+        padding-top: 30px;
+        padding-bottom: 30px;
+        padding-left: 18px;
+        padding-right: 18px;
+      }
+      .nav-links-left {
+        gap: 16px;
+      }
+      .hero-title {
+        font-size: 129.6px;
+        line-height: 113.4px;
+        letter-spacing: -7.7px;
+      }
+      .hero-lower {
+        gap: 28px;
+        padding-bottom: 52px;
+      }
+      .cta-col {
+        padding-left: 24px;
+      }
     }
 
-    .score-circle {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background: rgba(16, 185, 129, 0.08);
-      border: 2px solid var(--primary-light);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-    .score-num {
-      font-size: 18px;
-      font-weight: 800;
-      color: var(--primary-light);
-      line-height: 1;
-    }
-    .score-label {
-      font-size: 9px;
-      text-transform: uppercase;
-      font-weight: 600;
-      color: var(--text-dim);
-      margin-top: 2px;
-    }
-
-    .badge-status {
-      display: inline-block;
-      padding: 3px 10px;
-      border-radius: var(--radius-full);
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 14px;
-    }
-    .status-healthy { background: rgba(16, 185, 129, 0.15); color: #34d399; }
-    .status-mild_stress { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
-    .status-needs_attention { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
-    .status-high_risk { background: rgba(239, 68, 68, 0.15); color: #f87171; }
-
-    .summary-text {
-      font-size: 14px;
-      color: #cbd5e1;
-      line-height: 1.55;
-      padding: 14px;
-      border-radius: var(--radius-md);
-      background: rgba(0, 0, 0, 0.25);
-      border-left: 2px solid var(--primary);
-      margin-bottom: 18px;
-    }
-
-    .vital-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 18px;
-    }
-    .vital-card {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 12px;
-    }
-    .vital-title {
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text-dim);
-      margin-bottom: 4px;
-    }
-    .vital-val {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text);
+    /* Mobile: < 809.98px */
+    @media (max-width: 809.98px) {
+      .navbar-inner {
+        padding-top: 24px;
+        padding-bottom: 24px;
+        padding-left: 18px;
+        padding-right: 18px;
+      }
+      .nav-links-left, .nav-right {
+        display: none;
+      }
+      .mobile-menu-btn {
+        display: block;
+      }
+      .hero-section {
+        justify-content: flex-end;
+        align-items: flex-start;
+        gap: 72px;
+        padding-top: 140px;
+        padding-left: 18px;
+        padding-right: 18px;
+      }
+      .hero-flex-wrapper {
+        gap: 72px;
+      }
+      .hero-upper {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 28px;
+      }
+      .availability-col {
+        justify-content: flex-start;
+      }
+      .hero-lower {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 32px;
+        padding-bottom: 44px;
+      }
+      .hero-title {
+        font-size: clamp(68px, 21vw, 80px);
+        line-height: 96px;
+        letter-spacing: -4.8px;
+      }
+      .cta-col {
+        padding-left: 0;
+      }
+      .hero-desc {
+        max-width: 420px;
+      }
+      .workspace-grid {
+        grid-template-columns: 1fr;
+      }
     }
 
-    .rec-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
-      font-size: 13px;
-      color: var(--text-muted);
-      margin-bottom: 8px;
-    }
-    .rec-item svg {
-      width: 15px;
-      height: 15px;
-      color: var(--primary-light);
-      flex-shrink: 0;
-      margin-top: 3px;
-    }
-
-    /* Garden Grid */
-    .section-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
-    }
-    .section-title {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 24px;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-    }
-    .plant-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 18px;
-    }
-    .plant-item {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 20px;
-      transition: var(--transition);
-    }
-    .plant-item:hover {
-      border-color: var(--border-active);
-      transform: translateY(-2px);
-    }
-    .plant-item-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 12px;
-    }
-    .plant-item h3 {
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 2px;
-    }
-    .plant-item p {
-      font-size: 12px;
-      color: var(--text-dim);
-    }
-
-    /* Telemetry Minimalist */
-    .tele-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
-      margin-bottom: 28px;
-    }
-    .tele-box {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 20px;
-    }
-    .tele-label {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-dim);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 8px;
-    }
-    .tele-value {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 30px;
-      font-weight: 700;
-      letter-spacing: -0.03em;
-      margin-bottom: 4px;
-    }
-    .tele-sub {
-      font-size: 12px;
-      color: var(--primary-light);
-      font-weight: 500;
-    }
-
-    /* API Minimalist */
-    .endpoint-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px 18px;
-      background: rgba(0, 0, 0, 0.2);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      margin-bottom: 10px;
-      font-size: 13px;
-    }
-    .method-tag {
-      font-family: monospace;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 3px 8px;
-      border-radius: var(--radius-sm);
-    }
-    .method-get { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
-    .method-post { background: rgba(16, 185, 129, 0.15); color: #34d399; }
-
-    /* Modal Minimalist */
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 200;
-      padding: 20px;
-    }
-    .modal-card {
-      background: var(--bg-subtle);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      max-width: 400px;
-      width: 100%;
-      padding: 28px;
-      position: relative;
-    }
-    .modal-close {
-      position: absolute;
-      top: 18px;
-      right: 18px;
-      background: transparent;
-      border: none;
-      color: var(--text-dim);
-      font-size: 18px;
-      cursor: pointer;
-    }
-    .form-input {
-      width: 100%;
-      background: rgba(0, 0, 0, 0.3);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 10px 14px;
-      color: var(--text);
-      font-size: 14px;
-      margin-top: 6px;
-      margin-bottom: 14px;
-      outline: none;
-      transition: var(--transition);
-    }
-    .form-input:focus {
-      border-color: var(--primary-light);
-    }
-
-    footer {
-      border-top: 1px solid var(--border);
-      padding: 28px 0;
-      margin-top: 60px;
-      text-align: center;
-      font-size: 13px;
-      color: var(--text-dim);
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation: none !important;
+        transition: none !important;
+      }
     }
   </style>
 </head>
 <body>
-  <!-- Header -->
+
+  <!-- Fullscreen Crossfade Background Videos -->
+  <div class="video-background-container" aria-hidden="true">
+    <video class="bg-video active" id="vid-0" autoplay loop muted playsinline preload="auto">
+      <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260629_030107_874273ea-684a-4e90-bb96-8fdfde48d53d.mp4" type="video/mp4">
+    </video>
+    <video class="bg-video" id="vid-1" autoplay loop muted playsinline preload="auto">
+      <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260629_032424_3c9c2a9d-807b-4482-80e6-dd6d9dfd4545.mp4" type="video/mp4">
+    </video>
+    <video class="bg-video" id="vid-2" autoplay loop muted playsinline preload="auto">
+      <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260627_094019_4214ea73-b963-46a4-8327-61489192de99.mp4" type="video/mp4">
+    </video>
+    <div class="video-overlay"></div>
+  </div>
+
+  <!-- Navbar -->
   <header>
-    <div class="container header-inner">
-      <a href="/" class="brand">
-        <div class="brand-icon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
-        </div>
-        <div class="brand-name">PlantCare<span>.ai</span></div>
-      </a>
+    <div class="hero-container">
+      <div class="navbar-inner">
+        <!-- Left: Index Links -->
+        <nav class="nav-links-left" aria-label="Main Navigation">
+          <a class="nav-item" href="#scanner" onclick="scrollToScanner()">
+            <span class="nav-index">01</span>
+            <span class="nav-index">/</span>
+            <span class="nav-label">Works</span>
+            <span class="nav-link-underline"></span>
+          </a>
+          <a class="nav-item" href="#scanner" onclick="scrollToScanner()">
+            <span class="nav-index">02</span>
+            <span class="nav-index">/</span>
+            <span class="nav-label">Services</span>
+            <span class="nav-link-underline"></span>
+          </a>
+          <a class="nav-item" href="#scanner" onclick="scrollToScanner()">
+            <span class="nav-index">03</span>
+            <span class="nav-index">/</span>
+            <span class="nav-label">About</span>
+            <span class="nav-link-underline"></span>
+          </a>
+          <a class="nav-item" href="#scanner" onclick="scrollToScanner()">
+            <span class="nav-index">04</span>
+            <span class="nav-index">/</span>
+            <span class="nav-label">Contact</span>
+            <span class="nav-link-underline"></span>
+          </a>
+        </nav>
 
-      <div class="nav-pill-group">
-        <button class="nav-pill active" id="nav-scanner" onclick="switchView('scanner')">AI Diagnostics</button>
-        <button class="nav-pill" id="nav-garden" onclick="switchView('garden')">My Garden (<span id="gardenBadge">3</span>)</button>
-        <button class="nav-pill" id="nav-telemetry" onclick="switchView('telemetry')">IoT Sensors</button>
-        <button class="nav-pill" id="nav-api" onclick="switchView('api')">API Console</button>
+        <!-- Right: Email + Realtime Clock -->
+        <div class="nav-right">
+          <a href="mailto:Davies@gmail.com" class="nav-email">Davies@gmail.com</a>
+          <div class="nav-clock" id="liveClock" aria-label="Current Time">CUP --:--:--</div>
+        </div>
+
+        <!-- Mobile Toggle Button -->
+        <button class="mobile-menu-btn" id="mobileMenuBtn" aria-expanded="false" onclick="toggleMobileNav()">Menu</button>
       </div>
+    </div>
 
-      <div class="header-actions">
-        <div class="live-badge">
-          <div class="live-dot"></div>
-          <span>Serverless Online</span>
+    <!-- Mobile Collapsible Nav -->
+    <div class="mobile-nav-panel" id="mobileNavPanel">
+      <div class="mobile-nav-content">
+        <a href="#scanner" class="mobile-nav-link" onclick="toggleMobileNav(); scrollToScanner();">01 / Works</a>
+        <a href="#scanner" class="mobile-nav-link" onclick="toggleMobileNav(); scrollToScanner();">02 / Services</a>
+        <a href="#scanner" class="mobile-nav-link" onclick="toggleMobileNav(); scrollToScanner();">03 / About</a>
+        <a href="#scanner" class="mobile-nav-link" onclick="toggleMobileNav(); scrollToScanner();">04 / Contact</a>
+        <div style="margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--border-light);">
+          <div style="font-size: 13px; opacity: 0.7; margin-bottom: 6px;">Davies@gmail.com</div>
+          <div style="font-size: 13px; opacity: 0.9;" id="mobileClock">CUP --:--:--</div>
         </div>
-        <button class="btn-outline" id="authBtn" onclick="openAuthModal()">Sign In</button>
       </div>
     </div>
   </header>
 
-  <!-- Hero -->
-  <section class="hero container">
-    <div class="hero-eyebrow">Precision AI Botanical Intelligence</div>
-    <h1>Plant Health Diagnostics with <span>Computer Vision</span></h1>
-    <p>Upload a photo for disease detection, physiological stress analysis, and automated care prescriptions.</p>
-  </section>
-
-  <!-- Main Content -->
-  <main class="container">
-    <!-- View 1: Scanner -->
-    <div id="view-scanner" class="view-panel active">
-      <div class="scanner-grid">
-        <!-- Upload -->
-        <div class="glass-card">
-          <h3 style="font-size: 17px; margin-bottom: 14px; font-weight: 600;">Specimen Image</h3>
-          <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
-            <div class="dropzone-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            </div>
-            <h4>Select or Drop Plant Image</h4>
-            <p>PNG, JPG, WebP up to 10MB</p>
-            <input type="file" id="fileInput" style="display: none;" accept="image/*">
-            <div class="preview-box" id="previewBox">
-              <img id="previewImage" alt="Preview">
-              <div class="scan-beam" id="scanBeam"></div>
-            </div>
-          </div>
-
-          <div style="margin-top: 14px;">
-            <p style="font-size: 11px; text-transform: uppercase; color: var(--text-dim); font-weight: 600; letter-spacing: 0.05em;">Sample Specimens:</p>
-            <div class="preset-chips">
-              <div class="chip" onclick="loadSample('Monstera Deliciosa', 'healthy')">Healthy Monstera</div>
-              <div class="chip" onclick="loadSample('Tomato Leaf', 'blight')">Tomato Early Blight</div>
-              <div class="chip" onclick="loadSample('Sansevieria', 'dry')">Snake Plant</div>
-            </div>
-          </div>
-
-          <button class="btn-primary" id="analyzeBtn" onclick="executeScan()" disabled>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-            <span>Analyze Plant Health</span>
-          </button>
+  <!-- Hero Content -->
+  <main class="hero-section">
+    <div class="hero-container hero-flex-wrapper">
+      
+      <!-- Section 1: Video Switcher + Availability -->
+      <section class="hero-upper" aria-label="Experience Switcher">
+        <div class="switcher-col">
+          <button class="role-link active" onclick="switchVideo(0)" id="switch-0">01 / WATER WAVE</button>
+          <button class="role-link" onclick="switchVideo(1)" id="switch-1">02 / GRIDWAVE</button>
+          <button class="role-link" onclick="switchVideo(2)" id="switch-2">03 / LIGHT TUNNEL</button>
         </div>
 
-        <!-- Result -->
-        <div class="glass-card">
-          <div class="empty-state" id="emptyState">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            <h4 style="font-size: 15px; margin-bottom: 4px;">Awaiting Specimen Analysis</h4>
-            <p style="font-size: 13px; max-width: 320px; margin: 0 auto;">Select an image on the left and trigger diagnosis to inspect pathological evidence and care prescriptions.</p>
-          </div>
-
-          <div class="result-content" id="resultContent">
-            <div class="result-top">
-              <div>
-                <div class="species-name" id="resSpecies">Monstera Deliciosa</div>
-                <div class="scientific-name" id="resScientific">Monstera deliciosa</div>
-              </div>
-              <div class="score-circle">
-                <span class="score-num" id="resScore">85</span>
-                <span class="score-label">Health</span>
-              </div>
-            </div>
-
-            <div id="resBadge" class="badge-status status-healthy">Healthy Condition</div>
-
-            <div class="summary-text" id="resSummary">
-              Visual analysis confirms healthy foliage structure with no acute necrotic lesions or active pathogen signatures.
-            </div>
-
-            <div class="vital-grid">
-              <div class="vital-card">
-                <div class="vital-title">Hydration Strategy</div>
-                <div class="vital-val" id="resWater">Allow top 2" dry</div>
-              </div>
-              <div class="vital-card">
-                <div class="vital-title">Photometric Needs</div>
-                <div class="vital-val" id="resLight">Bright indirect</div>
-              </div>
-            </div>
-
-            <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; color: var(--text-dim); letter-spacing: 0.05em; margin-bottom: 8px;">Prescribed Actions</div>
-            <div id="resRecs">
-              <!-- Recommendations injected -->
-            </div>
-
-            <button class="btn-outline" style="width: 100%; margin-top: 18px;" onclick="addCurrentToGarden()">
-              + Save Specimen to Collection
-            </button>
-          </div>
+        <div class="availability-col" aria-label="Status">
+          <div class="status-dot" id="statusDot"></div>
+          <span class="status-text">Available for work</span>
         </div>
-      </div>
-    </div>
+      </section>
 
-    <!-- View 2: Garden -->
-    <div id="view-garden" class="view-panel">
-      <div class="section-head">
-        <div>
-          <h2 class="section-title">Plant Inventory</h2>
-          <p style="font-size: 13px; color: var(--text-muted);">Monitored specimens across your indoor and exterior collection.</p>
+      <!-- Section 2: Name + CTA -->
+      <section class="hero-lower" aria-label="Introduction">
+        <div class="name-col">
+          <h1 class="hero-title">
+            Viktor<span class="title-dot" id="titleDot">.</span>
+          </h1>
         </div>
-        <button class="btn-primary" style="width: auto; margin-top: 0; padding: 8px 18px;" onclick="openAddModal()">
-          + Add Specimen
-        </button>
-      </div>
 
-      <div class="plant-grid" id="plantGrid">
-        <!-- Injected via JS -->
-      </div>
-    </div>
+        <div class="cta-col">
+          <p class="hero-desc">
+            I craft bold brands and modern websites with purpose, precision, and state-of-the-art vision intelligence.
+          </p>
+          <a href="#scanner" class="btn-project" onclick="scrollToScanner()">
+            start a project
+          </a>
+        </div>
+      </section>
 
-    <!-- View 3: IoT Telemetry -->
-    <div id="view-telemetry" class="view-panel">
-      <div class="section-head">
-        <div>
-          <h2 class="section-title">Environmental Telemetry</h2>
-          <p style="font-size: 13px; color: var(--text-muted);">Real-time ambient probes and substrate hydration sensors.</p>
-        </div>
-        <button class="btn-outline" onclick="refreshSensors()">↻ Sync Probes</button>
-      </div>
-
-      <div class="tele-grid">
-        <div class="tele-box">
-          <div class="tele-label">Substrate Moisture</div>
-          <div class="tele-value" id="sMoisture">68%</div>
-          <div class="tele-sub">Optimal Volumetric Water</div>
-        </div>
-        <div class="tele-box">
-          <div class="tele-label">Ambient Temperature</div>
-          <div class="tele-value" id="sTemp">24.2°C</div>
-          <div class="tele-sub">Comfort Thermal Range</div>
-        </div>
-        <div class="tele-box">
-          <div class="tele-label">Luminosity Exposure</div>
-          <div class="tele-value" id="sLight">850 Lux</div>
-          <div class="tele-sub">Adequate PAR Level</div>
-        </div>
-        <div class="tele-box">
-          <div class="tele-label">Relative Humidity</div>
-          <div class="tele-value" id="sHumidity">58%</div>
-          <div class="tele-sub">Healthy Vapor Deficit</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- View 4: API Console -->
-    <div id="view-api" class="view-panel">
-      <div class="section-head">
-        <div>
-          <h2 class="section-title">REST Service Console</h2>
-          <p style="font-size: 13px; color: var(--text-muted);">Backend endpoints consumed by the Flutter mobile application.</p>
-        </div>
-      </div>
-
-      <div class="glass-card">
-        <div class="endpoint-row">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <span class="method-tag method-get">GET</span>
-            <strong>/</strong>
-            <span style="color: var(--text-dim);">System Diagnostic Ping</span>
-          </div>
-          <button class="chip" onclick="testPing('/')">Execute</button>
-        </div>
-        <div class="endpoint-row">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <span class="method-tag method-post">POST</span>
-            <strong>/auth/login</strong>
-            <span style="color: var(--text-dim);">Bearer Token Exchange</span>
-          </div>
-          <span style="font-size: 11px; color: var(--text-dim);">JSON Payload</span>
-        </div>
-        <div class="endpoint-row">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <span class="method-tag method-post">POST</span>
-            <strong>/scan</strong>
-            <span style="color: var(--text-dim);">Gemini Vision AI Analysis</span>
-          </div>
-          <span style="font-size: 11px; color: var(--text-dim);">Multipart Image</span>
-        </div>
-        <div class="endpoint-row">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <span class="method-tag method-get">GET</span>
-            <strong>/plants</strong>
-            <span style="color: var(--text-dim);">Collection Query</span>
-          </div>
-          <span style="font-size: 11px; color: var(--text-dim);">Authorization Header</span>
-        </div>
-      </div>
     </div>
   </main>
 
-  <!-- Auth Modal -->
-  <div class="modal-backdrop" id="authModal">
-    <div class="modal-card">
-      <button class="modal-close" onclick="closeAuthModal()">✕</button>
-      <h3 style="font-size: 18px; margin-bottom: 4px;" id="authTitle">Sign In</h3>
-      <p style="font-size: 13px; color: var(--text-dim); margin-bottom: 18px;" id="authSub">Access your synchronized plant telemetry.</p>
+  <!-- Interactive AI Diagnostics Workspace -->
+  <section class="interactive-panel" id="scanner">
+    <div class="hero-container">
+      <div class="panel-header">
+        <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-pink); font-weight: 600; margin-bottom: 8px;">AI Computer Vision Lab</div>
+        <h2 class="panel-title">Precision Botanical Diagnostics</h2>
+        <p class="panel-sub">Upload specimen leaves or select sample presets to evaluate pathogen probability, health index, and treatment roadmap.</p>
+      </div>
 
-      <form onsubmit="handleAuth(event)">
-        <div id="nameWrap" style="display: none;">
-          <label style="font-size: 11px; font-weight: 600; color: var(--text-dim); text-transform: uppercase;">Full Name</label>
-          <input type="text" id="aName" class="form-input" placeholder="Alex Morgan">
-        </div>
-        <div>
-          <label style="font-size: 11px; font-weight: 600; color: var(--text-dim); text-transform: uppercase;">Email Address</label>
-          <input type="email" id="aEmail" class="form-input" placeholder="alex@domain.com" required>
-        </div>
-        <div>
-          <label style="font-size: 11px; font-weight: 600; color: var(--text-dim); text-transform: uppercase;">Password</label>
-          <input type="password" id="aPass" class="form-input" placeholder="••••••••" required>
-        </div>
-        <button type="submit" class="btn-primary" id="aBtn">Continue</button>
-      </form>
+      <div class="workspace-grid">
+        <!-- Input Box -->
+        <div class="card-box">
+          <h3 style="font-size: 18px; margin-bottom: 16px; font-weight: 500;">Specimen Image</h3>
+          <div class="upload-zone" onclick="document.getElementById('plantFileInput').click()">
+            <div class="upload-icon">📷</div>
+            <div style="font-size: 15px; font-weight: 600; margin-bottom: 4px;">Drag & Drop or Click to Select</div>
+            <div style="font-size: 13px; color: rgba(255,255,255,0.5);">PNG, JPG, WebP formats up to 10MB</div>
+            <input type="file" id="plantFileInput" style="display: none;" accept="image/*">
+            <div class="preview-wrap" id="previewWrap">
+              <img id="previewImage" alt="Specimen Preview">
+              <div class="scan-line" id="scanLine"></div>
+            </div>
+          </div>
 
-      <p style="text-align: center; font-size: 12px; color: var(--text-dim); margin-top: 14px;">
-        <span id="authToggleHint">Don't have an account?</span>
-        <a href="#" style="color: var(--primary-light); text-decoration: none; font-weight: 600;" onclick="toggleAuth()">Register</a>
-      </p>
+          <div style="margin-top: 18px; display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="role-link active" style="padding: 6px 12px; background: rgba(255,255,255,0.06); border-radius: 9999px;" onclick="loadSampleSpecimen('Monstera Deliciosa', 'healthy')">Healthy Monstera</button>
+            <button class="role-link" style="padding: 6px 12px; background: rgba(255,255,255,0.06); border-radius: 9999px;" onclick="loadSampleSpecimen('Tomato Early Blight', 'blight')">Tomato Blight</button>
+            <button class="role-link" style="padding: 6px 12px; background: rgba(255,255,255,0.06); border-radius: 9999px;" onclick="loadSampleSpecimen('Sansevieria Trifasciata', 'dry')">Snake Plant</button>
+          </div>
+
+          <button class="btn-action" id="diagnoseBtn" onclick="runDiagnostics()" disabled>
+            Execute AI Health Diagnosis
+          </button>
+        </div>
+
+        <!-- Output Box -->
+        <div class="card-box" id="resultsBox">
+          <div id="emptyResults" style="text-align: center; padding: 60px 20px; color: rgba(255,255,255,0.4);">
+            <div style="font-size: 36px; margin-bottom: 12px;">🌱</div>
+            <h4 style="font-size: 16px; color: #fff; margin-bottom: 6px;">Awaiting Image Input</h4>
+            <p style="font-size: 13px;">Upload an image on the left and trigger diagnosis to inspect pathological signatures.</p>
+          </div>
+
+          <div id="fullResults" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px;">
+              <div>
+                <h3 id="resPlantName" style="font-size: 24px; font-weight: 600;">Monstera Deliciosa</h3>
+                <span id="resScientificName" style="font-size: 13px; color: rgba(255,255,255,0.5); font-style: italic;">Monstera deliciosa</span>
+              </div>
+              <div style="text-align: right;">
+                <div id="resScore" style="font-size: 28px; font-weight: 700; color: var(--accent-pink);">85%</div>
+                <div style="font-size: 10px; text-transform: uppercase; color: rgba(255,255,255,0.5);">Health Score</div>
+              </div>
+            </div>
+
+            <div class="result-badge" id="resStatusBadge">Healthy Foliage</div>
+
+            <p id="resSummary" style="font-size: 14px; line-height: 1.6; color: rgba(255,255,255,0.85); background: rgba(0,0,0,0.3); padding: 14px; border-radius: 10px; margin-bottom: 18px; border-left: 2px solid var(--accent-pink);">
+              Leaf cellular structure is intact with vibrant chlorophyll distribution and no acute signs of pathogenic necrosis.
+            </p>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px;">
+              <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; border: 1px solid var(--border-light);">
+                <div style="font-size: 11px; text-transform: uppercase; color: rgba(255,255,255,0.5); font-weight: 600;">Watering Strategy</div>
+                <div id="resWater" style="font-size: 13px; font-weight: 600; margin-top: 2px;">Dry top 2 inches</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; border: 1px solid var(--border-light);">
+                <div style="font-size: 11px; text-transform: uppercase; color: rgba(255,255,255,0.5); font-weight: 600;">Photometric Exposure</div>
+                <div id="resLight" style="font-size: 13px; font-weight: 600; margin-top: 2px;">Bright Indirect</div>
+              </div>
+            </div>
+
+            <div style="font-size: 11px; text-transform: uppercase; color: rgba(255,255,255,0.5); font-weight: 600; margin-bottom: 8px;">Actionable Prescriptions</div>
+            <div id="resRecommendations" style="font-size: 13px; color: rgba(255,255,255,0.75);"></div>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
-
-  <!-- Add Plant Modal -->
-  <div class="modal-backdrop" id="addModal">
-    <div class="modal-card">
-      <button class="modal-close" onclick="closeAddModal()">✕</button>
-      <h3 style="font-size: 18px; margin-bottom: 4px;">Register Specimen</h3>
-      <p style="font-size: 13px; color: var(--text-dim); margin-bottom: 18px;">Add a new specimen to track health and watering schedules.</p>
-
-      <form onsubmit="handleAdd(event)">
-        <div>
-          <label style="font-size: 11px; font-weight: 600; color: var(--text-dim); text-transform: uppercase;">Plant Identifier *</label>
-          <input type="text" id="pName" class="form-input" placeholder="e.g. Living Room Ficus" required>
-        </div>
-        <div>
-          <label style="font-size: 11px; font-weight: 600; color: var(--text-dim); text-transform: uppercase;">Botanical Category</label>
-          <input type="text" id="pType" class="form-input" placeholder="Ficus elastica">
-        </div>
-        <div>
-          <label style="font-size: 11px; font-weight: 600; color: var(--text-dim); text-transform: uppercase;">Location Tag</label>
-          <input type="text" id="pLoc" class="form-input" placeholder="East Window">
-        </div>
-        <button type="submit" class="btn-primary">Save Specimen</button>
-      </form>
-    </div>
-  </div>
-
-  <footer>
-    <div class="container">
-      PlantCare AI Platform • Precision Botanical Vision Intelligence
-    </div>
-  </footer>
+  </section>
 
   <script>
-    let activeFile = null;
-    let lastScanData = null;
-    let authMode = 'login';
+    // -------------------------------------------------------------
+    // Realtime 24h Clock (CUP HH:MM:SS)
+    // -------------------------------------------------------------
+    function updateClock() {
+      const now = new Date();
+      const formatter = new Intl.DateTimeFormat('en-GB', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      });
+      const timeStr = 'CUP ' + formatter.format(now);
+      const clockEl = document.getElementById('liveClock');
+      const mobileClockEl = document.getElementById('mobileClock');
+      if (clockEl) clockEl.textContent = timeStr;
+      if (mobileClockEl) mobileClockEl.textContent = timeStr;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
 
-    let garden = [
-      { id: 1, name: 'Monstera Deliciosa', type: 'Araceae', status: 'healthy', location: 'Living Room' },
-      { id: 2, name: 'Sansevieria Trifasciata', type: 'Asparagaceae', status: 'healthy', location: 'Office' },
-      { id: 3, name: 'Epipremnum Aureum', type: 'Araceae', status: 'mild_stress', location: 'Balcony' }
+    // -------------------------------------------------------------
+    // Video Background Switcher & Preload
+    // -------------------------------------------------------------
+    const videoUrls = [
+      'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260629_030107_874273ea-684a-4e90-bb96-8fdfde48d53d.mp4',
+      'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260629_032424_3c9c2a9d-807b-4482-80e6-dd6d9dfd4545.mp4',
+      'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260627_094019_4214ea73-b963-46a4-8327-61489192de99.mp4'
     ];
 
-    function switchView(viewId) {
-      document.querySelectorAll('.view-panel').forEach(v => v.classList.remove('active'));
-      document.querySelectorAll('.nav-pill').forEach(b => b.classList.remove('active'));
+    let activeVideoIndex = 0;
 
-      const targetView = document.getElementById('view-' + viewId);
-      const targetNav = document.getElementById('nav-' + viewId);
-      if (targetView) targetView.classList.add('active');
-      if (targetNav) targetNav.classList.add('active');
+    // Blob Preloader for instant playback
+    window.addEventListener('DOMContentLoaded', () => {
+      videoUrls.forEach((url, idx) => {
+        fetch(url)
+          .then(res => res.blob())
+          .then(blob => {
+            const objectUrl = URL.createObjectURL(blob);
+            const vid = document.getElementById('vid-' + idx);
+            if (vid) vid.src = objectUrl;
+          })
+          .catch(() => {
+            // Fallback to original URL if blob fetch fails
+            const vid = document.getElementById('vid-' + idx);
+            if (vid) vid.src = url;
+          });
+      });
+    });
+
+    function switchVideo(index) {
+      activeVideoIndex = index;
+      
+      // Update video opacities
+      for (let i = 0; i < 3; i++) {
+        const vid = document.getElementById('vid-' + i);
+        const btn = document.getElementById('switch-' + i);
+        if (vid) {
+          if (i === index) vid.classList.add('active');
+          else vid.classList.remove('active');
+        }
+        if (btn) {
+          if (i === index) btn.classList.add('active');
+          else btn.classList.remove('active');
+        }
+      }
+
+      // Slide 1 uses Pink (#F598F2), Slides 2-3 use White
+      const statusDot = document.getElementById('statusDot');
+      const titleDot = document.getElementById('titleDot');
+      if (index === 0) {
+        if (statusDot) statusDot.classList.remove('white-dot');
+        if (titleDot) titleDot.classList.remove('white-dot');
+      } else {
+        if (statusDot) statusDot.classList.add('white-dot');
+        if (titleDot) titleDot.classList.add('white-dot');
+      }
     }
 
-    // Upload & Drag Drop
-    const dropzone = document.getElementById('dropzone');
-    const fileInput = document.getElementById('fileInput');
-    const previewBox = document.getElementById('previewBox');
+    // -------------------------------------------------------------
+    // Mobile Nav Toggle
+    // -------------------------------------------------------------
+    function toggleMobileNav() {
+      const panel = document.getElementById('mobileNavPanel');
+      const btn = document.getElementById('mobileMenuBtn');
+      const isOpen = panel.classList.contains('open');
+      if (isOpen) {
+        panel.classList.remove('open');
+        btn.textContent = 'Menu';
+        btn.setAttribute('aria-expanded', 'false');
+      } else {
+        panel.classList.add('open');
+        btn.textContent = 'Close';
+        btn.setAttribute('aria-expanded', 'true');
+      }
+    }
+
+    function scrollToScanner() {
+      const el = document.getElementById('scanner');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // -------------------------------------------------------------
+    // Specimen Diagnostics Logic
+    // -------------------------------------------------------------
+    let selectedFile = null;
+    const fileInput = document.getElementById('plantFileInput');
+    const previewWrap = document.getElementById('previewWrap');
     const previewImage = document.getElementById('previewImage');
-    const analyzeBtn = document.getElementById('analyzeBtn');
+    const diagnoseBtn = document.getElementById('diagnoseBtn');
 
     fileInput.addEventListener('change', (e) => {
-      if (e.target.files && e.target.files[0]) bindFile(e.target.files[0]);
-    });
-    dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
-    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
-    dropzone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      dropzone.classList.remove('dragover');
-      if (e.dataTransfer.files && e.dataTransfer.files[0]) bindFile(e.dataTransfer.files[0]);
+      if (e.target.files && e.target.files[0]) {
+        loadFile(e.target.files[0]);
+      }
     });
 
-    function bindFile(file) {
-      activeFile = file;
+    function loadFile(file) {
+      selectedFile = file;
       const reader = new FileReader();
       reader.onload = (e) => {
         previewImage.src = e.target.result;
-        previewBox.style.display = 'block';
-        analyzeBtn.disabled = false;
+        previewWrap.style.display = 'block';
+        diagnoseBtn.disabled = false;
       };
       reader.readAsDataURL(file);
     }
 
-    function loadSample(name, status) {
+    function loadSampleSpecimen(name, status) {
       const c = document.createElement('canvas');
       c.width = 400; c.height = 300;
       const ctx = c.getContext('2d');
-      ctx.fillStyle = status === 'healthy' ? '#0c2419' : (status === 'blight' ? '#2b1c0e' : '#14201a');
+      ctx.fillStyle = status === 'healthy' ? '#081c12' : (status === 'blight' ? '#241408' : '#141c18');
       ctx.fillRect(0, 0, 400, 300);
       ctx.fillStyle = '#ffffff';
-      ctx.font = '600 20px Space Grotesk, sans-serif';
-      ctx.fillText(name, 20, 150);
-      c.toBlob(blob => bindFile(blob), 'image/jpeg');
+      ctx.font = '500 22px Figtree, sans-serif';
+      ctx.fillText(name, 24, 150);
+      c.toBlob(blob => loadFile(blob), 'image/jpeg');
     }
 
-    async function executeScan() {
-      if (!activeFile) return;
+    async function runDiagnostics() {
+      if (!selectedFile) return;
 
-      analyzeBtn.disabled = true;
-      analyzeBtn.innerHTML = '<span>Processing Vision Model...</span>';
-      document.getElementById('scanBeam').style.display = 'block';
+      diagnoseBtn.disabled = true;
+      diagnoseBtn.textContent = 'Analyzing Vision Signatures...';
+      document.getElementById('scanLine').style.display = 'block';
 
       const fd = new FormData();
-      fd.append('image', activeFile, 'specimen.jpg');
+      fd.append('image', selectedFile, 'specimen.jpg');
 
       try {
-        const token = localStorage.getItem('plantcare_token');
-        const headers = {};
-        if (token) headers['Authorization'] = 'Bearer ' + token;
-
-        const res = await fetch('/scan', { method: 'POST', headers, body: fd });
+        const res = await fetch('/scan', { method: 'POST', body: fd });
         const data = await res.json();
-        lastScanData = data;
-        renderScanResult(data);
+        renderResults(data);
       } catch (err) {
-        alert('Diagnostic network error: ' + err.message);
+        alert('Diagnostic error: ' + err.message);
       } finally {
-        analyzeBtn.disabled = false;
-        analyzeBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg><span>Analyze Plant Health</span>';
-        document.getElementById('scanBeam').style.display = 'none';
+        diagnoseBtn.disabled = false;
+        diagnoseBtn.textContent = 'Execute AI Health Diagnosis';
+        document.getElementById('scanLine').style.display = 'none';
       }
     }
 
-    function renderScanResult(d) {
-      document.getElementById('emptyState').style.display = 'none';
-      const content = document.getElementById('resultContent');
-      content.style.display = 'block';
+    function renderResults(d) {
+      document.getElementById('emptyResults').style.display = 'none';
+      document.getElementById('fullResults').style.display = 'block';
 
-      document.getElementById('resSpecies').textContent = d.plant_name || 'Specimen';
-      document.getElementById('resScientific').textContent = d.scientific_name || 'Plantae';
-      document.getElementById('resScore').textContent = d.health_score || 80;
-
-      const badge = document.getElementById('resBadge');
+      document.getElementById('resPlantName').textContent = d.plant_name || 'Houseplant';
+      document.getElementById('resScientificName').textContent = d.scientific_name || 'Plantae';
+      document.getElementById('resScore').textContent = (d.health_score || 85) + '%';
+      
+      const badge = document.getElementById('resStatusBadge');
       const st = d.health_status || 'healthy';
       badge.textContent = st.replace('_', ' ').toUpperCase();
-      badge.className = 'badge-status status-' + st;
 
-      document.getElementById('resSummary').textContent = d.summary || d.ai_explanation || 'Diagnostic completed.';
-      document.getElementById('resWater').textContent = (d.water && d.water.recommendation) || d.water_requirement || 'Balanced Hydration';
+      document.getElementById('resSummary').textContent = d.summary || d.ai_explanation || 'Foliage analysis complete.';
+      document.getElementById('resWater').textContent = (d.water && d.water.recommendation) || d.water_requirement || 'Allow topsoil to dry';
       document.getElementById('resLight').textContent = (d.light && d.light.recommendation) || d.light_requirement || 'Bright Indirect';
 
-      const recs = document.getElementById('resRecs');
+      const recs = document.getElementById('resRecommendations');
       recs.innerHTML = '';
-      (d.care_recommendations || ['Maintain standard schedule']).forEach(r => {
-        const row = document.createElement('div');
-        row.className = 'rec-item';
-        row.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>' + r + '</span>';
-        recs.appendChild(row);
+      (d.care_recommendations || ['Maintain standard hydration schedule']).forEach(r => {
+        const item = document.createElement('div');
+        item.style.marginBottom = '6px';
+        item.textContent = '• ' + r;
+        recs.appendChild(item);
       });
     }
-
-    function addCurrentToGarden() {
-      if (!lastScanData) return;
-      garden.unshift({
-        id: Date.now(),
-        name: lastScanData.plant_name,
-        type: lastScanData.scientific_name || 'Houseplant',
-        status: lastScanData.health_status,
-        location: 'Indoor'
-      });
-      renderGarden();
-      switchView('garden');
-    }
-
-    function renderGarden() {
-      const grid = document.getElementById('plantGrid');
-      const badge = document.getElementById('gardenBadge');
-      if (badge) badge.textContent = garden.length;
-      if (!grid) return;
-
-      grid.innerHTML = garden.map(p => \`
-        <div class="plant-item">
-          <div class="plant-item-top">
-            <span class="badge-status status-\${p.status}">\${p.status.replace('_', ' ')}</span>
-          </div>
-          <h3>\${p.name}</h3>
-          <p>\${p.type} • \${p.location}</p>
-        </div>
-      \`).join('');
-    }
-
-    function refreshSensors() {
-      document.getElementById('sMoisture').textContent = (64 + Math.floor(Math.random() * 8)) + '%';
-      document.getElementById('sTemp').textContent = (23 + (Math.random() * 2)).toFixed(1) + '°C';
-      document.getElementById('sLight').textContent = (800 + Math.floor(Math.random() * 100)) + ' Lux';
-      document.getElementById('sHumidity').textContent = (54 + Math.floor(Math.random() * 6)) + '%';
-    }
-
-    // Modal Handlers
-    function openAuthModal() { document.getElementById('authModal').style.display = 'flex'; }
-    function closeAuthModal() { document.getElementById('authModal').style.display = 'none'; }
-    function toggleAuth() {
-      authMode = authMode === 'login' ? 'register' : 'login';
-      document.getElementById('authTitle').textContent = authMode === 'login' ? 'Sign In' : 'Create Account';
-      document.getElementById('nameWrap').style.display = authMode === 'login' ? 'none' : 'block';
-      document.getElementById('aBtn').textContent = authMode === 'login' ? 'Continue' : 'Register';
-      document.getElementById('authToggleHint').textContent = authMode === 'login' ? "Don't have an account?" : 'Already registered?';
-    }
-
-    async function handleAuth(e) {
-      e.preventDefault();
-      const email = document.getElementById('aEmail').value;
-      const password = document.getElementById('aPass').value;
-      const fullName = document.getElementById('aName').value || 'User';
-
-      const url = authMode === 'login' ? '/auth/login' : '/auth/register';
-      const body = authMode === 'login' ? { email, password } : { full_name: fullName, email, password };
-
-      try {
-        const res = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
-        });
-        const data = await res.json();
-        if (res.ok && data.access_token) {
-          localStorage.setItem('plantcare_token', data.access_token);
-          document.getElementById('authBtn').textContent = data.user?.full_name || 'Account';
-          closeAuthModal();
-        } else {
-          alert(data.detail || 'Authentication error');
-        }
-      } catch (err) {
-        alert('Network request failed');
-      }
-    }
-
-    function openAddModal() { document.getElementById('addModal').style.display = 'flex'; }
-    function closeAddModal() { document.getElementById('addModal').style.display = 'none'; }
-    function handleAdd(e) {
-      e.preventDefault();
-      garden.unshift({
-        id: Date.now(),
-        name: document.getElementById('pName').value,
-        type: document.getElementById('pType').value || 'Houseplant',
-        status: 'healthy',
-        location: document.getElementById('pLoc').value || 'Home'
-      });
-      renderGarden();
-      closeAddModal();
-    }
-
-    async function testPing(path) {
-      const res = await fetch(path);
-      const data = await res.json();
-      alert('Diagnostic Response:\\n' + JSON.stringify(data, null, 2));
-    }
-
-    renderGarden();
   </script>
 </body>
 </html>`;
