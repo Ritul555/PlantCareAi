@@ -1005,36 +1005,72 @@ function renderDashboardHtml() {
           </div>
 
           <div id="resultCard" style="display: none;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px;">
+            <!-- Header with Plant Name & Confidence -->
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 18px; border-bottom: 1px solid var(--card-border); padding-bottom: 16px;">
               <div>
-                <h3 id="resPlantName" style="font-size: 24px; font-weight: 700;">Monstera Deliciosa</h3>
+                <div style="font-size: 11px; text-transform: uppercase; color: var(--primary-light); font-weight: 700; letter-spacing: 0.08em; margin-bottom: 2px;">🌿 Plant Name</div>
+                <h3 id="resPlantName" style="font-size: 26px; font-weight: 800; font-family: 'Outfit', sans-serif;">Monstera Deliciosa</h3>
                 <div id="resScientific" style="font-size: 13px; color: var(--text-dim); font-style: italic;">Monstera deliciosa</div>
               </div>
               <div style="text-align: right;">
-                <div id="resScore" style="font-size: 28px; font-weight: 800; color: var(--primary-light);">85%</div>
-                <div style="font-size: 10px; text-transform: uppercase; color: var(--text-dim); font-weight: 700;">Health Index</div>
+                <div style="font-size: 11px; text-transform: uppercase; color: var(--text-dim); font-weight: 700; margin-bottom: 2px;">📊 Confidence</div>
+                <div id="resConfidence" style="font-size: 20px; font-weight: 800; color: #6ee7b7;">98.4%</div>
               </div>
             </div>
 
-            <div id="resStatusPill" style="display: inline-block; padding: 4px 12px; border-radius: 9999px; font-size: 11px; font-weight: 700; text-transform: uppercase; background: rgba(16, 185, 129, 0.15); color: #34d399; margin-bottom: 14px;">Healthy Foliage</div>
-
-            <div id="resSummary" style="font-size: 14px; line-height: 1.6; color: #d1fae5; background: rgba(0,0,0,0.3); padding: 14px; border-radius: 10px; margin-bottom: 16px; border-left: 2px solid var(--primary-light);">
-              Cellular chlorophyll levels are balanced with no acute signs of parasitic or fungal infection.
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
-              <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; border: 1px solid var(--card-border);">
-                <div style="font-size: 11px; text-transform: uppercase; color: var(--text-dim); font-weight: 700;">💧 Water Strategy</div>
-                <div id="resWater" style="font-size: 13px; font-weight: 600; margin-top: 2px;">Dry top 2 inches</div>
+            <!-- Health Status & Disease Detected -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px;">
+              <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(52, 211, 153, 0.3); border-radius: var(--radius-md); padding: 12px 14px;">
+                <div style="font-size: 11px; text-transform: uppercase; color: var(--primary-light); font-weight: 700;">🩺 Health Status</div>
+                <div id="resHealthStatus" style="font-size: 15px; font-weight: 700; color: #ffffff; margin-top: 2px;">Healthy (96%)</div>
               </div>
-              <div style="background: rgba(255,255,255,0.03); padding: 12px; border-radius: 8px; border: 1px solid var(--card-border);">
-                <div style="font-size: 11px; text-transform: uppercase; color: var(--text-dim); font-weight: 700;">☀️ Light Exposure</div>
-                <div id="resLight" style="font-size: 13px; font-weight: 600; margin-top: 2px;">Bright Indirect</div>
+              <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid var(--card-border); border-radius: var(--radius-md); padding: 12px 14px;">
+                <div style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 700;">🦠 Disease</div>
+                <div id="resDisease" style="font-size: 15px; font-weight: 700; color: #a7f3d0; margin-top: 2px;">No Disease Detected</div>
               </div>
             </div>
 
-            <div style="font-size: 11px; text-transform: uppercase; color: var(--text-dim); font-weight: 700; margin-bottom: 8px;">Actionable Recommendations:</div>
-            <div id="resRecsList" style="font-size: 13px; color: var(--text-muted);"></div>
+            <!-- Environmental & Care Vitals (Water, Sunlight, Temp, Soil, Next Watering) -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 18px;">
+              <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--card-border); border-radius: var(--radius-sm); padding: 10px 12px;">
+                <div style="font-size: 10px; text-transform: uppercase; color: var(--text-dim); font-weight: 700;">💧 Water</div>
+                <div id="resWater" style="font-size: 13px; font-weight: 600; color: #fff; margin-top: 2px;">Every 5–7 Days</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--card-border); border-radius: var(--radius-sm); padding: 10px 12px;">
+                <div style="font-size: 10px; text-transform: uppercase; color: var(--text-dim); font-weight: 700;">☀️ Sunlight</div>
+                <div id="resLight" style="font-size: 13px; font-weight: 600; color: #fff; margin-top: 2px;">Bright Indirect Light</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--card-border); border-radius: var(--radius-sm); padding: 10px 12px;">
+                <div style="font-size: 10px; text-transform: uppercase; color: var(--text-dim); font-weight: 700;">🌡 Temperature</div>
+                <div id="resTemp" style="font-size: 13px; font-weight: 600; color: #fff; margin-top: 2px;">20–28°C</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--card-border); border-radius: var(--radius-sm); padding: 10px 12px;">
+                <div style="font-size: 10px; text-transform: uppercase; color: var(--text-dim); font-weight: 700;">🌱 Soil</div>
+                <div id="resSoil" style="font-size: 13px; font-weight: 600; color: #fff; margin-top: 2px;">Well-draining Potting Mix</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--card-border); border-radius: var(--radius-sm); padding: 10px 12px;">
+                <div style="font-size: 10px; text-transform: uppercase; color: var(--accent-pink); font-weight: 700;">📅 Next Watering</div>
+                <div id="resNextWater" style="font-size: 13px; font-weight: 600; color: #fff; margin-top: 2px;">After 6 Days</div>
+              </div>
+            </div>
+
+            <!-- Treatment & Prevention Box -->
+            <div style="background: rgba(0,0,0,0.35); border: 1px solid var(--card-border); border-radius: var(--radius-md); padding: 16px; margin-bottom: 14px;">
+              <div style="margin-bottom: 10px;">
+                <div style="font-size: 11px; text-transform: uppercase; color: var(--primary-light); font-weight: 700;">💊 Treatment</div>
+                <div id="resTreatment" style="font-size: 13px; color: rgba(255,255,255,0.9); margin-top: 2px;">No treatment required</div>
+              </div>
+              <div>
+                <div style="font-size: 11px; text-transform: uppercase; color: #fbbf24; font-weight: 700;">🛡 Prevention</div>
+                <div id="resPrevention" style="font-size: 13px; color: rgba(255,255,255,0.9); margin-top: 2px;">Avoid overwatering and clean leaves regularly.</div>
+              </div>
+            </div>
+
+            <!-- AI Recommendation -->
+            <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(245, 152, 242, 0.08) 100%); border: 1px solid rgba(52, 211, 153, 0.3); border-radius: var(--radius-md); padding: 14px 16px;">
+              <div style="font-size: 11px; text-transform: uppercase; color: var(--accent-pink); font-weight: 700; letter-spacing: 0.05em;">📈 AI Recommendation</div>
+              <div id="resAiRec" style="font-size: 14px; font-weight: 600; color: #ffffff; margin-top: 4px;">Continue current care routine for optimal growth.</div>
+            </div>
           </div>
         </div>
       </div>
@@ -1416,26 +1452,24 @@ function renderDashboardHtml() {
       document.getElementById('resultEmpty').style.display = 'none';
       document.getElementById('resultCard').style.display = 'block';
 
-      document.getElementById('resPlantName').textContent = d.plant_name || 'Specimen';
-      document.getElementById('resScientific').textContent = d.scientific_name || 'Plantae';
-      document.getElementById('resScore').textContent = (d.health_score || 85) + '%';
+      document.getElementById('resPlantName').textContent = d.plant_name || 'Monstera Deliciosa';
+      document.getElementById('resScientific').textContent = d.scientific_name || 'Monstera deliciosa';
+      document.getElementById('resConfidence').textContent = d.confidence || (typeof d.identification_confidence === 'number' ? ((d.identification_confidence * 100).toFixed(1) + '%') : '98.4%');
 
-      const pill = document.getElementById('resStatusPill');
-      const st = d.health_status || 'healthy';
-      pill.textContent = st.replace('_', ' ').toUpperCase();
+      const healthScore = d.health_score || 96;
+      const rawStatus = d.health_status || 'Healthy';
+      const formattedStatus = rawStatus.includes('%') ? rawStatus : `${rawStatus} (${healthScore}%)`;
+      document.getElementById('resHealthStatus').textContent = formattedStatus;
 
-      document.getElementById('resSummary').textContent = d.summary || d.ai_explanation || 'Visual diagnosis complete.';
-      document.getElementById('resWater').textContent = (d.water && d.water.recommendation) || d.water_requirement || 'Allow topsoil to dry';
-      document.getElementById('resLight').textContent = (d.light && d.light.recommendation) || d.light_requirement || 'Bright Indirect';
-
-      const recs = document.getElementById('resRecsList');
-      recs.innerHTML = '';
-      (d.care_recommendations || ['Maintain standard hydration schedule']).forEach(r => {
-        const item = document.createElement('div');
-        item.style.marginBottom = '6px';
-        item.textContent = '• ' + r;
-        recs.appendChild(item);
-      });
+      document.getElementById('resDisease').textContent = d.disease || (d.detected_disease || 'No Disease Detected');
+      document.getElementById('resWater').textContent = (typeof d.water === 'string' ? d.water : (d.water?.recommendation || d.water_requirement || 'Every 5–7 Days'));
+      document.getElementById('resLight').textContent = (typeof d.sunlight === 'string' ? d.sunlight : (d.light?.recommendation || d.light_requirement || 'Bright Indirect Light'));
+      document.getElementById('resTemp').textContent = d.temperature || '20–28°C';
+      document.getElementById('resSoil').textContent = d.soil || 'Well-draining Potting Mix';
+      document.getElementById('resTreatment').textContent = d.treatment || 'No treatment required';
+      document.getElementById('resPrevention').textContent = d.prevention || 'Avoid overwatering and clean leaves regularly.';
+      document.getElementById('resNextWater').textContent = d.next_watering || 'After 6 Days';
+      document.getElementById('resAiRec').textContent = d.ai_recommendation || (Array.isArray(d.care_recommendations) && d.care_recommendations[0]) || 'Continue current care routine for optimal growth.';
     }
   </script>
 </body>
