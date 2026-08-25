@@ -337,12 +337,13 @@ function renderDashboardHtml() {
     }
 
     .hero-title {
-      font-size: 200px;
-      line-height: 81%;
-      letter-spacing: -6px;
+      font-size: clamp(72px, 10.5vw, 150px);
+      line-height: 85%;
+      letter-spacing: -0.04em;
       font-weight: 500;
       text-transform: uppercase;
       margin: 0;
+      white-space: nowrap;
       animation: revealUp 0.9s var(--ease-spring) forwards;
     }
 
@@ -754,13 +755,13 @@ function renderDashboardHtml() {
       <section class="hero-lower" aria-label="Introduction">
         <div class="name-col">
           <h1 class="hero-title">
-            Viktor<span class="title-dot" id="titleDot">.</span>
+            PlantCareAi<span class="title-dot" id="titleDot">.</span>
           </h1>
         </div>
 
         <div class="cta-col">
           <p class="hero-desc">
-            I craft bold brands and modern websites with purpose, precision, and state-of-the-art vision intelligence.
+            Intelligent Plant Disease Detection & Care Recommendations
           </p>
           <a href="#scanner" class="btn-project" onclick="scrollToScanner()">
             start a project
