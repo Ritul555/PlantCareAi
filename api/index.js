@@ -807,6 +807,25 @@ if (!initError && express) {
     return res.send(renderDashboardHtml());
   });
 
+  app.get(['/report', '/report.pdf'], (req, res) => {
+    const pdfPath = path.join(__dirname, 'PlantCare_AI_University_Project_Report.pdf');
+    if (fs.existsSync(pdfPath)) {
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', 'inline; filename="PlantCare_AI_University_Project_Report.pdf"');
+      return res.sendFile(pdfPath);
+    }
+    return res.status(404).send('Report PDF not found');
+  });
+
+  app.get('/report.html', (req, res) => {
+    const htmlPath = path.join(__dirname, 'PlantCare_AI_University_Project_Report.html');
+    if (fs.existsSync(htmlPath)) {
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      return res.sendFile(htmlPath);
+    }
+    return res.status(404).send('Report HTML not found');
+  });
+
   app.get('/health', (req, res) => {
     res.json({ status: 'ok' });
   });
