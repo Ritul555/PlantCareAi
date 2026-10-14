@@ -1736,14 +1736,6 @@ function renderDashboardHtml() {
 
         <div class="nav-right">
 
-          <a href="mailto:ritul.gautam24@gmail.com" class="contact-badge" title="Click to email ritul.gautam24@gmail.com">
-
-            <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline-block;vertical-align:middle;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg></span>
-
-            <span>ritul.gautam24@gmail.com</span>
-
-          </a>
-
           <div class="contact-badge">
 
             <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline-block;vertical-align:middle;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> India</span>
@@ -1783,8 +1775,6 @@ function renderDashboardHtml() {
         <a href="#contact" class="mobile-nav-link" onclick="toggleMobileNav(); navigateTo('contact');">04 / Contact</a>
 
         <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--card-border);">
-
-          <div style="font-size: 13px; color: var(--primary-light); margin-bottom: 6px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline-block;vertical-align:middle;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg> ritul.gautam24@gmail.com</div>
 
           <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 6px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline-block;vertical-align:middle;"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> India</div>
 
@@ -2414,25 +2404,7 @@ function renderDashboardHtml() {
 
           <h3 style="font-size: 22px; margin-bottom: 24px;">Direct Contact Information</h3>
 
-          
 
-          <div class="contact-info-row">
-
-            <div class="contact-info-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline-block;vertical-align:middle;"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg></div>
-
-            <div>
-
-              <div class="contact-info-label">Official Email</div>
-
-              <div class="contact-info-val">
-
-                <a href="mailto:ritul.gautam24@gmail.com">ritul.gautam24@gmail.com</a>
-
-              </div>
-
-            </div>
-
-          </div>
 
 
 
@@ -2562,7 +2534,7 @@ function renderDashboardHtml() {
 
       <p style="font-weight: 600; color: rgba(255,255,255,0.7); margin-bottom: 6px;">PlantCare AI &mdash; Scan. Detect. Protect.</p>
 
-      <p style="font-size: 12px;">Contact: <a href="mailto:ritul.gautam24@gmail.com" style="color: var(--primary-light); text-decoration: none;">ritul.gautam24@gmail.com</a> &bull; India</p>
+      <p style="font-size: 12px; color: var(--text-muted);">PlantCare AI &bull; India</p>
 
     </div>
 
